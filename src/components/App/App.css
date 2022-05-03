@@ -1,3 +1,14 @@
 .App {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.App .editor {
+  display: flex;
+  flex-direction: row;
+}
+
+.App .editor textarea {
+  width: 600px;
+  height: 400px;
 }
