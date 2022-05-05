@@ -20,6 +20,7 @@ import Expression, {
   LiteralExpression,
 } from "./Expression";
 import Tokenizer from "../tokenizer/Tokenizer";
+import gameVariables from "../compiler/gameVariables";
 
 class Parser {
   private tokens: Token[];
@@ -289,7 +290,9 @@ class Parser {
   private primary(): Expression {
     const token = this.getNextToken();
     if (token.type === TokenType.VARIABLE) {
-      this.variables[token.lexeme] = token;
+      if (!gameVariables.includes(token.lexeme)) {
+        this.variables[token.lexeme] = token;
+      }
     }
     if (token.type === TokenType.LEFT_PAREN) {
       return this.groupExpression();

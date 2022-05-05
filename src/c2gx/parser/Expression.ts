@@ -4,6 +4,8 @@ import TokenType from "../tokenizer/TokenType";
 abstract class Expression {
   abstract translate(): string;
   abstract evaluate(): Expression;
+  abstract traverse(process: (expr: Expression) => void): void;
+  abstract toString(): string;
 
   protected evaluateBinary(expr: Expression): Expression {
     if (expr instanceof BinaryExpression) {
@@ -67,6 +69,16 @@ class BinaryExpression extends Expression {
     this.exprRight = this.evaluateBinary(this.exprRight);
     return this.evaluateBinary(this);
   }
+
+  traverse(process: (expr: Expression) => void): void {
+    process(this);
+    this.exprLeft.traverse(process);
+    this.exprRight.traverse(process);
+  }
+
+  toString(): string {
+    return `BinaryExpression(${this.exprLeft} ${this.operator.lexeme}, ${this.exprRight})`;
+  }
 }
 
 class AssignExpression extends Expression {
@@ -89,6 +101,15 @@ class AssignExpression extends Expression {
     this.exprRight = this.evaluateBinary(this.exprRight);
     return this;
   }
+
+  traverse(process: (expr: Expression) => void): void {
+    process(this);
+    this.exprRight.traverse(process);
+  }
+
+  toString(): string {
+    return `AssignExpression(${this.variable.lexeme} ${this.operator.lexeme} ${this.exprRight})`;
+  }
 }
 
 class GroupExpression extends Expression {
@@ -107,6 +128,15 @@ class GroupExpression extends Expression {
     this.expr = this.evaluateBinary(this.expr);
     return this.expr;
   }
+
+  traverse(process: (expr: Expression) => void): void {
+    process(this);
+    this.expr.traverse(process);
+  }
+
+  toString(): string {
+    return `GroupExpression(${this.expr})`;
+  }
 }
 
 class LiteralExpression extends Expression {
@@ -123,6 +153,14 @@ class LiteralExpression extends Expression {
 
   evaluate(): Expression {
     return this;
+  }
+
+  traverse(process: (expr: Expression) => void): void {
+    process(this);
+  }
+
+  toString(): string {
+    return `LiteralExpression(${this.token.lexeme})`;
   }
 }
 

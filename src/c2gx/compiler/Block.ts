@@ -1,12 +1,12 @@
 import Statement from "../parser/Statement";
-import VariableRecord from "./VariableRecord";
+import VariableRecord, { VariableRecordMap } from "./VariableRecord";
 
 class Block {
   statement: Statement;
   predecessors: Block[] = [];
   successors: Block[] = [];
-  private input: { [key: string]: VariableRecord } = {};
-  private output: { [key: string]: VariableRecord } = {};
+  input: VariableRecordMap = {};
+  output: VariableRecordMap = {};
 
   constructor(statement: Statement) {
     this.statement = statement;

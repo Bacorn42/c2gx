@@ -100,6 +100,10 @@ class IfStatement extends Statement {
   getFirstStatement(): Statement {
     return this.ifs[0].statements[0];
   }
+
+  getFirstCondition(): Expression {
+    return this.ifs[0].condition;
+  }
 }
 
 class WhileStatement extends Statement {
@@ -214,6 +218,10 @@ class ExpressionStatement extends Statement {
 
   translate(): string {
     return `${this.expr.translate()}\n`;
+  }
+
+  getExpr(): Expression {
+    return this.expr;
   }
 }
 
