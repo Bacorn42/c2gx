@@ -2,7 +2,7 @@ import Token from "../tokenizer/Token";
 import TokenType from "../tokenizer/TokenType";
 import { LiteralExpression } from "./Expression";
 import If from "./If";
-import {
+import Statement, {
   ForStatement,
   GameStatement,
   GotoStatement,
@@ -20,26 +20,34 @@ import {
   LiteralExpressionFactory,
 } from "./testUtil";
 
+const translateStatements = (statements: Statement[]): string => {
+  let translation = "";
+  for (const statement of statements) {
+    translation += statement.translate();
+  }
+  return translation;
+};
+
 describe("Statement", () => {
-  describe("Translations", () => {
+  describe("Simple translations", () => {
     it("Should translate game statement", () => {
       const stmt = new GameStatement('"Levelset"');
-      expect(stmt.translate()).toStrictEqual('game "Levelset"');
+      expect(stmt.translate()).toMatch('game "Levelset"');
     });
 
     it("Should translate map statement", () => {
       const stmt = new MapStatement('"level.c2m"');
-      expect(stmt.translate()).toStrictEqual('map "level.c2m"');
+      expect(stmt.translate()).toMatch('map "level.c2m"');
     });
 
     it("Should translate music statement", () => {
       const stmt = new MusicStatment('"song.mp3"');
-      expect(stmt.translate()).toStrictEqual('music "song.mp3"');
+      expect(stmt.translate()).toMatch('music "song.mp3"');
     });
 
     it("Should translate script statement", () => {
       const stmt = new ScriptStatement(['"Some text"', '"More text"', '"Some more text"']);
-      expect(stmt.translate()).toStrictEqual('script\n"Some text"\n"More text"\n"Some more text"');
+      expect(stmt.translate()).toMatch('script\n"Some text"\n"More text"\n"Some more text"');
     });
 
     it("Should translate complete if statement", () => {
@@ -69,7 +77,7 @@ describe("Statement", () => {
         "\n7" +
         "\n#endif0";
 
-      expect(stmt.translate()).toStrictEqual(expectedString);
+      expect(stmt.translate()).toMatch(expectedString);
     });
 
     it("Should translate if statement without else", () => {
@@ -100,7 +108,7 @@ describe("Statement", () => {
         "\n" +
         "\n#endif0";
 
-      expect(stmt.translate()).toStrictEqual(expectedString);
+      expect(stmt.translate()).toMatch(expectedString);
     });
 
     it("Should translate while statement", () => {
@@ -118,7 +126,7 @@ describe("Statement", () => {
         "\ngoto #while0" +
         "\n#endwhile0";
 
-      expect(stmt.translate()).toStrictEqual(expectedString);
+      expect(stmt.translate()).toMatch(expectedString);
     });
 
     it("Should translate for loop", () => {
@@ -142,25 +150,36 @@ describe("Statement", () => {
         "\ngoto #for0" +
         "\n#endfor0";
 
-      expect(stmt.translate()).toStrictEqual(expectedString);
+      expect(stmt.translate()).toMatch(expectedString);
     });
 
     it("Should translate label statement", () => {
       const stmt = new LabelStatement("#start");
-      expect(stmt.translate()).toStrictEqual("#start");
+      expect(stmt.translate()).toMatch("#start");
     });
 
     it("Should translate goto statement", () => {
       const stmt = new GotoStatement(new LabelStatement("#start"));
-      expect(stmt.translate()).toStrictEqual("goto #start");
+      expect(stmt.translate()).toMatch("goto #start");
     });
 
     it("Should translate expression statement", () => {
       const stmt1 = ExpressionStatementFactory(1);
-      expect(stmt1.translate()).toStrictEqual("1");
+      expect(stmt1.translate()).toMatch("1");
 
       const stmt2 = BinaryExpressionStatementFactory(1, new Token(TokenType.TIMES, "*", 1), 2);
-      expect(stmt2.translate()).toStrictEqual("1 * 2");
+      expect(stmt2.translate()).toMatch("1 * 2");
+    });
+  });
+
+  describe("Compound translations", () => {
+    it("Should translate series of expression statements", () => {
+      const stmts = [
+        ExpressionStatementFactory(1),
+        ExpressionStatementFactory(2),
+        ExpressionStatementFactory(3),
+      ];
+      expect(translateStatements(stmts)).toMatch("1\n2\n3");
     });
   });
 });

@@ -1,4 +1,5 @@
 import React, { ChangeEvent, useState } from "react";
+import Compiler from "../../c2gx/compiler/Compiler";
 import "./App.css";
 
 function App() {
@@ -14,7 +15,8 @@ function App() {
   };
 
   const translate = (code: string): string => {
-    return code;
+    const compiler = new Compiler(code);
+    return compiler.compile();
   };
 
   return (

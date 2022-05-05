@@ -37,7 +37,6 @@ describe("Parser", () => {
         ExpressionStatementFactory('"some string"'),
       ];
       const parser = new Parser(code);
-      debugger;
       expect(parser.getStatements()).toStrictEqual(expectedStatements);
     });
 

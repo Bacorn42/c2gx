@@ -14,7 +14,7 @@ class GameStatement extends Statement {
   }
 
   translate(): string {
-    return `game ${this.setName}`;
+    return `game ${this.setName}\n`;
   }
 }
 
@@ -27,7 +27,7 @@ class MapStatement extends Statement {
   }
 
   translate(): string {
-    return `map ${this.path}`;
+    return `map ${this.path}\n`;
   }
 }
 
@@ -40,7 +40,7 @@ class MusicStatment extends Statement {
   }
 
   translate(): string {
-    return `music ${this.path}`;
+    return `music ${this.path}\n`;
   }
 }
 
@@ -57,7 +57,7 @@ class ScriptStatement extends Statement {
     for (const script of this.scripts) {
       output += `\n${script}`;
     }
-    return output;
+    return `${output}\n`;
   }
 }
 
@@ -93,8 +93,12 @@ class IfStatement extends Statement {
       `\n${statements}` +
       `#else${this.id}` +
       `\n${elseStatments}` +
-      `\n#endif${this.id}`
+      `\n#endif${this.id}\n`
     );
+  }
+
+  getFirstStatement(): Statement {
+    return this.ifs[0].statements[0];
   }
 }
 
@@ -119,7 +123,7 @@ class WhileStatement extends Statement {
       `\n#whileloop${this.id}` +
       `\n${statements}` +
       `\ngoto #while${this.id}` +
-      `\n#endwhile${this.id}`
+      `\n#endwhile${this.id}\n`
     );
   }
 }
@@ -161,7 +165,7 @@ class ForStatement extends Statement {
       `\n${statements}` +
       `\n${this.variable.translate()} = ${this.variable.translate()} + ${this.by.translate()}` +
       `\ngoto #for${this.id}` +
-      `\n#endfor${this.id}`
+      `\n#endfor${this.id}\n`
     );
   }
 }
@@ -175,7 +179,11 @@ class LabelStatement extends Statement {
   }
 
   translate(): string {
-    return `${this.label}`;
+    return `${this.label}\n`;
+  }
+
+  getLabel(): string {
+    return this.label;
   }
 }
 
@@ -188,7 +196,11 @@ class GotoStatement extends Statement {
   }
 
   translate(): string {
-    return `goto ${this.label.translate()}`;
+    return `goto ${this.label.translate()}\n`;
+  }
+
+  getLabel(): string {
+    return this.label.getLabel();
   }
 }
 
@@ -201,7 +213,13 @@ class ExpressionStatement extends Statement {
   }
 
   translate(): string {
-    return this.expr.translate();
+    return `${this.expr.translate()}\n`;
+  }
+}
+
+class EmptyStatement extends Statement {
+  translate(): string {
+    return "";
   }
 }
 
@@ -218,4 +236,5 @@ export {
   LabelStatement,
   GotoStatement,
   ExpressionStatement,
+  EmptyStatement,
 };

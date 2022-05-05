@@ -42,6 +42,10 @@ class Parser {
     return this.statements;
   }
 
+  getVariables(): { [key: string]: Token } {
+    return this.variables;
+  }
+
   private parse(): void {
     while (!this.isEnd()) {
       this.statements.push(this.statement());
