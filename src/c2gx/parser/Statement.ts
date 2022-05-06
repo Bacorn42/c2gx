@@ -1,8 +1,13 @@
 import If from "./If";
 import Expression from "./Expression";
+import { VariableRecordMap } from "../compiler/VariableRecord";
 
 abstract class Statement {
   abstract translate(): string;
+  output(): string {
+    return this.translate();
+  }
+  replace(vars: VariableRecordMap, output: VariableRecordMap): void {}
 }
 
 class GameStatement extends Statement {
@@ -97,6 +102,16 @@ class IfStatement extends Statement {
     );
   }
 
+  replace(vars: VariableRecordMap, output: VariableRecordMap): void {
+    this.ifs[0].condition.replace(vars, output);
+  }
+
+  output(): string {
+    return `if ${this.ifs[0].condition.translate()} ${this.ifs[0].statements[0]
+      .output()
+      .trim()} end\n`;
+  }
+
   getFirstStatement(): Statement {
     return this.ifs[0].statements[0];
   }
@@ -123,7 +138,7 @@ class WhileStatement extends Statement {
     return (
       `#while${this.id}` +
       `\nif ${this.condition.translate()} goto #whileloop${this.id} end` +
-      `\ngoto endwhile${this.id}` +
+      `\ngoto #endwhile${this.id}` +
       `\n#whileloop${this.id}` +
       `\n${statements}` +
       `\ngoto #while${this.id}` +
@@ -203,6 +218,10 @@ class GotoStatement extends Statement {
     return `goto ${this.label.translate()}\n`;
   }
 
+  output(): string {
+    return `goto ${this.label.output().trim()}\n`;
+  }
+
   getLabel(): string {
     return this.label.getLabel();
   }
@@ -218,6 +237,10 @@ class ExpressionStatement extends Statement {
 
   translate(): string {
     return `${this.expr.translate()}\n`;
+  }
+
+  replace(vars: VariableRecordMap, output: VariableRecordMap): void {
+    this.expr.replace(vars, output);
   }
 
   getExpr(): Expression {

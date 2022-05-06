@@ -174,7 +174,7 @@ class Parser {
   }
 
   private expression(): Expression {
-    return this.assignment();
+    return this.assignment().evaluate();
   }
 
   private assignment(): Expression {
@@ -323,6 +323,7 @@ class Parser {
 
   private expect(type: TokenType): Token {
     if (this.getToken().type !== type) {
+      debugger;
       throw Error(`Expected ${TokenType[type]} but got ${TokenType[this.getToken().type]}`);
     }
     return this.getNextToken();

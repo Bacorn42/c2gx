@@ -1,4 +1,3 @@
-import { createWatchCompilerHost } from "typescript";
 import Token from "./Token";
 import TokenType from "./TokenType";
 

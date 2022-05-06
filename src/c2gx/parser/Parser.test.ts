@@ -41,62 +41,62 @@ describe("Parser", () => {
     });
 
     it("Should parse addition and subtraction", () => {
-      const code = "1 + 2   3 - 4";
+      const code = "var1 + var2   var3 - var4";
       const expectedStatements = [
-        BinaryExpressionStatementFactory(1, new Token(TokenType.PLUS, "+", 1), 2),
-        BinaryExpressionStatementFactory(3, new Token(TokenType.MINUS, "-", 1), 4),
+        BinaryExpressionStatementFactory("var1", new Token(TokenType.PLUS, "+", 1), "var2"),
+        BinaryExpressionStatementFactory("var3", new Token(TokenType.MINUS, "-", 1), "var4"),
       ];
       const parser = new Parser(code);
       expect(parser.getStatements()).toStrictEqual(expectedStatements);
     });
 
     it("Should parse multiplication, division, and mod", () => {
-      const code = "1 * 2   3 / 4   5 % 6";
+      const code = "var1 * var2   var3 / var4   var5 % var6";
       const expectedStatements = [
-        BinaryExpressionStatementFactory(1, new Token(TokenType.TIMES, "*", 1), 2),
-        BinaryExpressionStatementFactory(3, new Token(TokenType.DIVIDE, "/", 1), 4),
-        BinaryExpressionStatementFactory(5, new Token(TokenType.MOD, "%", 1), 6),
+        BinaryExpressionStatementFactory("var1", new Token(TokenType.TIMES, "*", 1), "var2"),
+        BinaryExpressionStatementFactory("var3", new Token(TokenType.DIVIDE, "/", 1), "var4"),
+        BinaryExpressionStatementFactory("var5", new Token(TokenType.MOD, "%", 1), "var6"),
       ];
       const parser = new Parser(code);
       expect(parser.getStatements()).toStrictEqual(expectedStatements);
     });
 
     it("Should parse comparison", () => {
-      const code = "1 > 2   3 < 4";
+      const code = "var1 > var2   var3 < var4";
       const expectedStatements = [
-        BinaryExpressionStatementFactory(1, new Token(TokenType.GREATER, ">", 1), 2),
-        BinaryExpressionStatementFactory(3, new Token(TokenType.LESS, "<", 1), 4),
+        BinaryExpressionStatementFactory("var1", new Token(TokenType.GREATER, ">", 1), "var2"),
+        BinaryExpressionStatementFactory("var3", new Token(TokenType.LESS, "<", 1), "var4"),
       ];
       const parser = new Parser(code);
       expect(parser.getStatements()).toStrictEqual(expectedStatements);
     });
 
     it("Should parse equality", () => {
-      const code = "1 == 2   3 != 4";
+      const code = "var1 == var2   var3 != var4";
       const expectedStatements = [
-        BinaryExpressionStatementFactory(1, new Token(TokenType.EQUAL_EQUAL, "==", 1), 2),
-        BinaryExpressionStatementFactory(3, new Token(TokenType.NOT_EQUAL, "!=", 1), 4),
+        BinaryExpressionStatementFactory("var1", new Token(TokenType.EQUAL_EQUAL, "==", 1), "var2"),
+        BinaryExpressionStatementFactory("var3", new Token(TokenType.NOT_EQUAL, "!=", 1), "var4"),
       ];
       const parser = new Parser(code);
       expect(parser.getStatements()).toStrictEqual(expectedStatements);
     });
 
     it("Should parse bitwise operators", () => {
-      const code = "1 & 2   3 | 4   5 ^ 6";
+      const code = "var1 & var2   var3 | var4   var5 ^ var6";
       const expectedStatements = [
-        BinaryExpressionStatementFactory(1, new Token(TokenType.AND, "&", 1), 2),
-        BinaryExpressionStatementFactory(3, new Token(TokenType.OR, "|", 1), 4),
-        BinaryExpressionStatementFactory(5, new Token(TokenType.XOR, "^", 1), 6),
+        BinaryExpressionStatementFactory("var1", new Token(TokenType.AND, "&", 1), "var2"),
+        BinaryExpressionStatementFactory("var3", new Token(TokenType.OR, "|", 1), "var4"),
+        BinaryExpressionStatementFactory("var5", new Token(TokenType.XOR, "^", 1), "var6"),
       ];
       const parser = new Parser(code);
       expect(parser.getStatements()).toStrictEqual(expectedStatements);
     });
 
     it("Should parse boolean operators", () => {
-      const code = "1 && 2   3 || 4";
+      const code = "var1 && var2   var3 || var4";
       const expectedStatements = [
-        BinaryExpressionStatementFactory(1, new Token(TokenType.AND_AND, "&&", 1), 2),
-        BinaryExpressionStatementFactory(3, new Token(TokenType.OR_OR, "||", 1), 4),
+        BinaryExpressionStatementFactory("var1", new Token(TokenType.AND_AND, "&&", 1), "var2"),
+        BinaryExpressionStatementFactory("var3", new Token(TokenType.OR_OR, "||", 1), "var4"),
       ];
       const parser = new Parser(code);
       expect(parser.getStatements()).toStrictEqual(expectedStatements);
@@ -122,15 +122,6 @@ describe("Parser", () => {
       expect(() => {
         new Parser(code);
       }).toThrow("Cannot assign");
-    });
-
-    it("Should parse group expression", () => {
-      const code = "(1)";
-      const expectedStatements = [
-        new ExpressionStatement(new GroupExpression(LiteralExpressionFactory(1))),
-      ];
-      const parser = new Parser(code);
-      expect(parser.getStatements()).toStrictEqual(expectedStatements);
     });
 
     it("Should parse game expression", () => {
@@ -197,17 +188,17 @@ describe("Parser", () => {
 
   describe("Compound parsing", () => {
     it("Should parse nested expression", () => {
-      const code = "1 + 2 + 3 - 4";
+      const code = "var1 + var2 + var3 - var4";
       const expectedStatements = [
         new ExpressionStatement(
           new BinaryExpression(
             new BinaryExpression(
-              BinaryExpressionFactory(1, new Token(TokenType.PLUS, "+", 1), 2),
+              BinaryExpressionFactory("var1", new Token(TokenType.PLUS, "+", 1), "var2"),
               new Token(TokenType.PLUS, "+", 1),
-              LiteralExpressionFactory(3)
+              LiteralExpressionFactory("var3")
             ),
             new Token(TokenType.MINUS, "-", 1),
-            LiteralExpressionFactory(4)
+            LiteralExpressionFactory("var4")
           )
         ),
       ];
@@ -216,16 +207,16 @@ describe("Parser", () => {
     });
 
     it("Should parse operator precedence", () => {
-      const code = "1 & 2 + 3 * 4";
+      const code = "var1 & var2 + var3 * var4";
       const expectedStatements = [
         new ExpressionStatement(
           new BinaryExpression(
-            LiteralExpressionFactory(1),
+            LiteralExpressionFactory("var1"),
             new Token(TokenType.AND, "&", 1),
             new BinaryExpression(
-              LiteralExpressionFactory(2),
+              LiteralExpressionFactory("var2"),
               new Token(TokenType.PLUS, "+", 1),
-              BinaryExpressionFactory(3, new Token(TokenType.TIMES, "*", 1), 4)
+              BinaryExpressionFactory("var3", new Token(TokenType.TIMES, "*", 1), "var4")
             )
           )
         ),

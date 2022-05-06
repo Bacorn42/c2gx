@@ -1,4 +1,3 @@
-import { addSyntheticLeadingComment } from "typescript";
 import Expression, { AssignExpression, LiteralExpression } from "../parser/Expression";
 import Statement, {
   EmptyStatement,
@@ -8,6 +7,7 @@ import Statement, {
   LabelStatement,
   MapStatement,
 } from "../parser/Statement";
+import { LiteralExpressionFactory } from "../parser/testUtil";
 import Token from "../tokenizer/Token";
 import TokenType from "../tokenizer/TokenType";
 import Block, { SimpleBlock } from "./Block";
@@ -27,16 +27,20 @@ class Graph {
     const edges: [number, number][] = [];
 
     for (const [i, statement] of statements.entries()) {
-      this.blocks.push(new Block(statement));
       if (statement instanceof LabelStatement) {
         labels[statement.getLabel()] = i;
-      } else if (statement instanceof GotoStatement) {
+      }
+    }
+
+    for (const [i, statement] of statements.entries()) {
+      this.blocks.push(new Block(statement));
+      if (statement instanceof GotoStatement) {
         edges.push([i, labels[statement.getLabel()]]);
       } else if (statement instanceof IfStatement) {
         edges.push([i, labels[(statement.getFirstStatement() as GotoStatement).getLabel()]]);
       }
 
-      if (!(statement instanceof GotoStatement) && i != statements.length - 1) {
+      if (!(statement instanceof GotoStatement) && i !== statements.length - 1) {
         edges.push([i, i + 1]);
       }
     }
@@ -65,15 +69,18 @@ class Graph {
         [block.output, changed] = this.transfer(block);
       }
     }
-    debugger;
   }
 
-  getVariableRecordMap(): VariableRecordMap {
+  getOutput(): VariableRecordMap {
     return this.blocks[this.blocks.length - 1].output;
   }
 
   getBlocks(): Block[] {
     return this.blocks;
+  }
+
+  getBlocksWithoutEntry(): Block[] {
+    return this.blocks.slice(1);
   }
 
   getSimpleBlocks(): SimpleBlock[] {
@@ -90,7 +97,10 @@ class Graph {
     for (const block of this.blocks) {
       const vars: VariableRecordMap = {};
       for (const variable in variables) {
-        vars[variable] = new VariableRecord(null, VariableState.UNDEFINED);
+        vars[variable] = new VariableRecord(
+          LiteralExpressionFactory(variable),
+          VariableState.UNDEFINED
+        );
       }
       block.output = vars;
     }

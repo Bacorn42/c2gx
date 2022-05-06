@@ -54,13 +54,13 @@ describe("Statement", () => {
       const stmt = new IfStatement(
         [
           new If(BinaryExpressionFactory(1, new Token(TokenType.LESS, "<", 1), 2), [
-            LiteralExpressionFactory(3),
+            ExpressionStatementFactory(3),
           ]),
           new If(BinaryExpressionFactory(4, new Token(TokenType.LESS, "<", 1), 5), [
-            LiteralExpressionFactory(6),
+            ExpressionStatementFactory(6),
           ]),
         ],
-        [LiteralExpressionFactory(7)],
+        [ExpressionStatementFactory(7)],
         0
       );
       const expectedString =
@@ -84,10 +84,10 @@ describe("Statement", () => {
       const stmt = new IfStatement(
         [
           new If(BinaryExpressionFactory(1, new Token(TokenType.LESS, "<", 1), 2), [
-            LiteralExpressionFactory(3),
+            ExpressionStatementFactory(3),
           ]),
           new If(BinaryExpressionFactory(4, new Token(TokenType.LESS, "<", 1), 5), [
-            LiteralExpressionFactory(6),
+            ExpressionStatementFactory(6),
           ]),
         ],
         [],
@@ -114,7 +114,7 @@ describe("Statement", () => {
     it("Should translate while statement", () => {
       const stmt = new WhileStatement(
         BinaryExpressionFactory(1, new Token(TokenType.LESS, "<", 1), 2),
-        [LiteralExpressionFactory(3)],
+        [ExpressionStatementFactory(3)],
         0
       );
       const expectedString =
@@ -135,7 +135,7 @@ describe("Statement", () => {
         LiteralExpressionFactory(1),
         LiteralExpressionFactory(5),
         LiteralExpressionFactory(2),
-        [LiteralExpressionFactory(3)],
+        [ExpressionStatementFactory(3)],
         0
       );
 

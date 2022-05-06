@@ -1,10 +1,15 @@
+import gameVariables from "../compiler/gameVariables";
+import { VariableRecordMap } from "../compiler/VariableRecord";
+import VariableState from "../compiler/VariableState";
 import Token from "../tokenizer/Token";
 import TokenType from "../tokenizer/TokenType";
+import { LiteralExpressionFactory } from "./testUtil";
 
 abstract class Expression {
   abstract translate(): string;
   abstract evaluate(): Expression;
   abstract traverse(process: (expr: Expression) => void): void;
+  abstract replace(vars: VariableRecordMap, output: VariableRecordMap): void;
   abstract toString(): string;
 
   protected evaluateBinary(expr: Expression): Expression {
@@ -42,9 +47,38 @@ abstract class Expression {
         return left > right ? 1 : 0;
       case TokenType.GREATER_EQUAL:
         return left >= right ? 1 : 0;
+      case TokenType.AND:
+        return left & right;
+      case TokenType.OR:
+        return left | right;
+      case TokenType.XOR:
+        return left ^ right;
+      case TokenType.AND_AND:
+        return left && right ? 1 : 0;
+      case TokenType.OR_OR:
+        return left || right ? 1 : 0;
       default:
         throw Error("Unsupported operator");
     }
+  }
+
+  protected replaceVariable(
+    expr: Expression,
+    vars: VariableRecordMap,
+    output: VariableRecordMap
+  ): Expression {
+    if (expr instanceof LiteralExpression) {
+      if (expr.token.type === TokenType.VARIABLE) {
+        const variable = expr.token.lexeme;
+        if (!gameVariables.includes(variable) && variable in vars) {
+          if (output[variable].state !== VariableState.RUNTIME) {
+            return vars[variable].value as Expression;
+          }
+          return LiteralExpressionFactory(variable);
+        }
+      }
+    }
+    return expr;
   }
 }
 
@@ -74,6 +108,13 @@ class BinaryExpression extends Expression {
     process(this);
     this.exprLeft.traverse(process);
     this.exprRight.traverse(process);
+  }
+
+  replace(vars: VariableRecordMap, output: VariableRecordMap): void {
+    this.exprLeft.replace(vars, output);
+    this.exprRight.replace(vars, output);
+    this.exprLeft = this.replaceVariable(this.exprLeft, vars, output);
+    this.exprRight = this.replaceVariable(this.exprRight, vars, output);
   }
 
   toString(): string {
@@ -107,6 +148,11 @@ class AssignExpression extends Expression {
     this.exprRight.traverse(process);
   }
 
+  replace(vars: VariableRecordMap, output: VariableRecordMap): void {
+    this.exprRight.replace(vars, output);
+    this.exprRight = this.replaceVariable(this.exprRight, vars, output);
+  }
+
   toString(): string {
     return `AssignExpression(${this.variable.lexeme} ${this.operator.lexeme} ${this.exprRight})`;
   }
@@ -134,6 +180,11 @@ class GroupExpression extends Expression {
     this.expr.traverse(process);
   }
 
+  replace(vars: VariableRecordMap, output: VariableRecordMap): void {
+    this.expr.replace(vars, output);
+    this.expr = this.replaceVariable(this.expr, vars, output);
+  }
+
   toString(): string {
     return `GroupExpression(${this.expr})`;
   }
@@ -158,6 +209,8 @@ class LiteralExpression extends Expression {
   traverse(process: (expr: Expression) => void): void {
     process(this);
   }
+
+  replace(vars: VariableRecordMap, output: VariableRecordMap): void {}
 
   toString(): string {
     return `LiteralExpression(${this.token.lexeme})`;

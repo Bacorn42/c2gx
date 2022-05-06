@@ -57,7 +57,7 @@ describe("Graph", () => {
     });
 
     it("Should handle simple if statements", () => {
-      const code = "1 #start 2 if 1 == 1 goto #start end 3";
+      const code = "1 #start 2 if var == 1 goto #start end 3";
       const expectedSimpleBlocks = [
         new SimpleBlock(new EmptyStatement(), [1], []),
         new SimpleBlock(ExpressionStatementFactory(1), [2], [0]),
@@ -66,9 +66,10 @@ describe("Graph", () => {
         new SimpleBlock(
           new IfStatement(
             [
-              new If(BinaryExpressionFactory(1, new Token(TokenType.EQUAL_EQUAL, "==", 1), 1, 1), [
-                new GotoStatement(new LabelStatement("#start")),
-              ]),
+              new If(
+                BinaryExpressionFactory("var", new Token(TokenType.EQUAL_EQUAL, "==", 1), 1, 1),
+                [new GotoStatement(new LabelStatement("#start"))]
+              ),
             ],
             [],
             0
@@ -91,7 +92,7 @@ describe("Graph", () => {
       };
       const graph = getGraph(code);
       graph.iterativeConstantAnalysis(getVariables(code));
-      expect(graph.getVariableRecordMap()).toStrictEqual(expectedValue);
+      expect(graph.getOutput()).toStrictEqual(expectedValue);
     });
 
     it("Should not detect game variables as user variables", () => {
@@ -102,7 +103,7 @@ describe("Graph", () => {
       };
       const graph = getGraph(code);
       graph.iterativeConstantAnalysis(getVariables(code));
-      expect(graph.getVariableRecordMap()).toStrictEqual(expectedValue);
+      expect(graph.getOutput()).toStrictEqual(expectedValue);
     });
 
     it("Should detect potentially runtime variables after a map statement", () => {
@@ -116,7 +117,7 @@ describe("Graph", () => {
       };
       const graph = getGraph(code);
       graph.iterativeConstantAnalysis(getVariables(code));
-      expect(graph.getVariableRecordMap()).toStrictEqual(expectedValue);
+      expect(graph.getOutput()).toStrictEqual(expectedValue);
     });
 
     it("Shouldn't consider indirect game variables as runtime", () => {
@@ -131,7 +132,7 @@ describe("Graph", () => {
       };
       const graph = getGraph(code);
       graph.iterativeConstantAnalysis(getVariables(code));
-      expect(graph.getVariableRecordMap()).toStrictEqual(expectedValue);
+      expect(graph.getOutput()).toStrictEqual(expectedValue);
     });
 
     it("Should detect usage of potentially runtime variable as runtime", () => {
@@ -142,7 +143,7 @@ describe("Graph", () => {
       };
       const graph = getGraph(code);
       graph.iterativeConstantAnalysis(getVariables(code));
-      expect(graph.getVariableRecordMap()).toStrictEqual(expectedValue);
+      expect(graph.getOutput()).toStrictEqual(expectedValue);
     });
 
     it("Should detect assigning to self as runtime if it's potentially runtime", () => {
@@ -155,7 +156,7 @@ describe("Graph", () => {
       };
       const graph = getGraph(code);
       graph.iterativeConstantAnalysis(getVariables(code));
-      expect(graph.getVariableRecordMap()).toStrictEqual(expectedValue);
+      expect(graph.getOutput()).toStrictEqual(expectedValue);
     });
 
     it("Should detect assigning to self as constant if it's constant", () => {
@@ -168,7 +169,7 @@ describe("Graph", () => {
       };
       const graph = getGraph(code);
       graph.iterativeConstantAnalysis(getVariables(code));
-      expect(graph.getVariableRecordMap()).toStrictEqual(expectedValue);
+      expect(graph.getOutput()).toStrictEqual(expectedValue);
     });
 
     it("Should detect runtime variable in loop when meet detects different values", () => {
@@ -181,7 +182,7 @@ describe("Graph", () => {
       };
       const graph = getGraph(code);
       graph.iterativeConstantAnalysis(getVariables(code));
-      expect(graph.getVariableRecordMap()).toStrictEqual(expectedValue);
+      expect(graph.getOutput()).toStrictEqual(expectedValue);
     });
 
     it("Should detect potentially runtime variable in if condition as runtime", () => {
@@ -191,7 +192,7 @@ describe("Graph", () => {
       };
       const graph = getGraph(code);
       graph.iterativeConstantAnalysis(getVariables(code));
-      expect(graph.getVariableRecordMap()).toStrictEqual(expectedValue);
+      expect(graph.getOutput()).toStrictEqual(expectedValue);
     });
   });
 });

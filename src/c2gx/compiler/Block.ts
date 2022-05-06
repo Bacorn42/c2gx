@@ -1,5 +1,5 @@
 import Statement from "../parser/Statement";
-import VariableRecord, { VariableRecordMap } from "./VariableRecord";
+import { VariableRecordMap } from "./VariableRecord";
 
 class Block {
   statement: Statement;
