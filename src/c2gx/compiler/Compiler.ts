@@ -1,22 +1,26 @@
-import { LiteralExpression } from "../parser/Expression";
+import { AssignExpression, LiteralExpression } from "../parser/Expression";
 import Parser from "../parser/Parser";
 import Statement, {
   EmptyStatement,
+  ExpressionStatement,
   GotoStatement,
   IfStatement,
   LabelStatement,
 } from "../parser/Statement";
 import Token from "../tokenizer/Token";
 import Block from "./Block";
+import CompilerOptions from "./CompilerOptions";
 import Graph from "./Graph";
 import { VariableRecordMap } from "./VariableRecord";
 import VariableState from "./VariableState";
 
 class Compiler {
   private code: string;
+  private options: CompilerOptions;
 
-  constructor(code: string) {
+  constructor(code: string, options: CompilerOptions = {}) {
     this.code = code;
+    this.options = options;
   }
 
   compile(): string {
@@ -60,9 +64,17 @@ class Compiler {
         );
         block.statement.replace(input, output);
       }
-      blocks = this.evaluateIfs(blocks);
-      blocks = this.removeDeadCode(blocks);
+      if (!this.options.noCodeRemoval) {
+        blocks = this.evaluateIfs(blocks);
+        if (!this.options.noUselessExpressionRemoval) {
+          blocks = this.removeUselessExpressions(blocks);
+        }
+        blocks = this.removeDeadCode(blocks);
+      }
       if (this.isSameOutput(lastOutput, output) && lastBlockCount === blocks.length) {
+        if (!this.options.noVariableReplacement) {
+          blocks = this.replaceVariables(blocks, output, variables);
+        }
         return blocks;
       }
       lastOutput = output;
@@ -99,6 +111,18 @@ class Compiler {
           } else {
             block.statement = block.statement.getFirstStatement();
           }
+        }
+      }
+    }
+    return this.removeEmptyBlocks(blocks);
+  }
+
+  private removeUselessExpressions(blocks: Block[]): Block[] {
+    for (const block of blocks) {
+      if (block.statement instanceof ExpressionStatement) {
+        const expr = block.statement.getExpr();
+        if (!(expr instanceof AssignExpression)) {
+          block.statement = new EmptyStatement();
         }
       }
     }
@@ -145,6 +169,30 @@ class Compiler {
       blocks = this.removeEmptyBlocks(blocks);
     }
     return blocks;
+  }
+
+  private replaceVariables(
+    blocks: Block[],
+    output: VariableRecordMap,
+    variables: Record<string, Token>
+  ): Block[] {
+    blocks = this.removeConstants(blocks, output);
+    return blocks;
+  }
+
+  private removeConstants(blocks: Block[], output: VariableRecordMap): Block[] {
+    for (const block of blocks) {
+      const statement = block.statement;
+      if (statement instanceof ExpressionStatement) {
+        const expr = statement.getExpr();
+        if (expr instanceof AssignExpression) {
+          if (output[expr.variable.lexeme].state !== VariableState.RUNTIME) {
+            block.statement = new EmptyStatement();
+          }
+        }
+      }
+    }
+    return this.removeEmptyBlocks(blocks);
   }
 
   private getLabels(blocks: Block[]): Set<string> {
