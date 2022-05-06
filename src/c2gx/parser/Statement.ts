@@ -87,10 +87,14 @@ class IfStatement extends Statement {
         (ifPart, i) =>
           `#if${this.id}x${i}\n${ifPart.statements
             .map((s) => s.translate())
-            .join("")}\ngoto #endif${this.id}\n`
+            .join("")
+            .trim()}\ngoto #endif${this.id}\n`
       )
       .join("");
-    const elseStatments = this.elsePart.map((s) => s.translate()).join("");
+    const elseStatments = this.elsePart
+      .map((s) => s.translate())
+      .join("")
+      .trim();
 
     return (
       `${conditions}` +
@@ -134,7 +138,11 @@ class WhileStatement extends Statement {
   }
 
   translate(): string {
-    const statements = this.statements.map((s) => s.translate()).join("");
+    const statements = this.statements
+      .map((s) => s.translate())
+      .join("")
+      .trim();
+
     return (
       `#while${this.id}` +
       `\nif ${this.condition.translate()} goto #whileloop${this.id} end` +
@@ -173,7 +181,10 @@ class ForStatement extends Statement {
   }
 
   translate(): string {
-    const statements = this.statements.map((s) => s.translate()).join("");
+    const statements = this.statements
+      .map((s) => s.translate())
+      .join("")
+      .trim();
 
     return (
       `${this.variable.translate()} = ${this.from.translate()}` +

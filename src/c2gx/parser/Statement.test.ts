@@ -120,7 +120,7 @@ describe("Statement", () => {
       const expectedString =
         "#while0" +
         "\nif 1 < 2 goto #whileloop0 end" +
-        "\ngoto endwhile0" +
+        "\ngoto #endwhile0" +
         "\n#whileloop0" +
         "\n3" +
         "\ngoto #while0" +

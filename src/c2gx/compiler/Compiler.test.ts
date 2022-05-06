@@ -135,16 +135,81 @@ describe("Compiler", () => {
       expect(new Compiler(code).compile()).toMatch(expectedValue);
     });
 
-    it("Should compile label statement", () => {
-      const code = "#start";
-      const expectedValue = "#start";
+    it("Should compile goto statement", () => {
+      const code = "#start 1 goto #start";
+      const expectedValue = "#start\n1\ngoto #start";
+      expect(new Compiler(code).compile()).toMatch(expectedValue);
+    });
+  });
+
+  describe("Optimization", () => {
+    it("Should remove unreachable if statement", () => {
+      const code = "if 1 > 2 3 end";
+      const expectedValue = "";
       expect(new Compiler(code).compile()).toMatch(expectedValue);
     });
 
-    it("Should compile goto statement", () => {
-      const code = "#start goto #start";
-      const expectedValue = "#start\ngoto #start";
+    it("Should remove unreachable elseif", () => {
+      const code = "if var1 == 1 1 elseif 1 > 2 2 else 3 end";
+      const expectedValue =
+        "if var1 == 1 goto #if0x0 end" +
+        "\ngoto #else0" +
+        "\n#if0x0" +
+        "\n1" +
+        "\ngoto #endif0" +
+        "\n#else0" +
+        "\n3" +
+        "\n#endif0";
+
       expect(new Compiler(code).compile()).toMatch(expectedValue);
+    });
+
+    it("Should always evaluate true if", () => {
+      const code = "if 1 < 2 1 2 elseif var1 == 1 3 4 else 5 6 end";
+      const expectedValue = "1\n2";
+      expect(new Compiler(code).compile()).toMatch(expectedValue);
+    });
+
+    it("Should remove all elseifs after the one that's always true", () => {
+      const code = "if var1 == 1 1 2 elseif 1 < 2 3 4 elseif var1 == 2 5 6 else 7 8 end";
+      const expectedValue =
+        "if var1 == 1 goto #if0x0 end" +
+        "\ngoto #if0x1" +
+        "\n#if0x0" +
+        "\n1" +
+        "\n2" +
+        "\ngoto #endif0" +
+        "\n#if0x1" +
+        "\n3" +
+        "\n4" +
+        "\n#endif";
+
+      expect(new Compiler(code).compile()).toMatch(expectedValue);
+    });
+
+    it("Should remove unreachable code", () => {
+      const code = "#start 1 2 goto #start 3 4";
+      const expectedValue = "#start\n1\n2\ngoto #start";
+      const unexpectedValue = "3\n4";
+      expect(new Compiler(code).compile()).toMatch(expectedValue);
+      expect(new Compiler(code).compile()).not.toMatch(unexpectedValue);
+    });
+
+    it("Should remove unreachable code in the middle", () => {
+      const code = "1 2 goto #start 3 4 #start 5 6";
+      const expectedValue = "1\n2\n5\n6";
+      expect(new Compiler(code).compile()).toMatch(expectedValue);
+    });
+
+    it("Should remove empty loops", () => {
+      const code = "1 2 #start goto #start 3 4";
+      const expectedValue = "1\n2";
+      const unexpectedValue1 = "3\n4";
+      const unexpectedValue2 = "#start";
+      console.log(new Compiler(code).compile());
+      expect(new Compiler(code).compile()).toMatch(expectedValue);
+      expect(new Compiler(code).compile()).not.toMatch(unexpectedValue1);
+      expect(new Compiler(code).compile()).not.toMatch(unexpectedValue2);
     });
   });
 });

@@ -148,8 +148,8 @@ class Graph {
 
     for (const [variable, record] of Object.entries(block.output)) {
       if (
-        vars[variable].value?.toString() !== record.value?.toString() ||
-        vars[variable].state !== record.state
+        vars[variable]?.value?.toString() !== record.value?.toString() ||
+        vars[variable]?.state !== record.state
       ) {
         changed = true;
       }
@@ -201,7 +201,7 @@ class Graph {
     const usedVariables = this.getUsedVariables(statement.getFirstCondition(), vars);
     for (const variable of usedVariables) {
       if (!gameVariables.includes(variable)) {
-        if (vars[variable].state === VariableState.POTENTIALLY_RUNTIME) {
+        if (vars[variable]?.state === VariableState.POTENTIALLY_RUNTIME) {
           vars[variable].state = VariableState.RUNTIME;
         }
       }
@@ -229,7 +229,7 @@ class Graph {
       const variables = [...usedVariables];
       for (const variable of variables) {
         if (!gameVariables.includes(variable)) {
-          vars[variable].value?.traverse(getExpressionVariables);
+          vars[variable]?.value?.traverse(getExpressionVariables);
         } else if (!gameVariablesInExpression.has(variable)) {
           usedVariables.delete(variable);
         }
