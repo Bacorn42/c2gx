@@ -27,7 +27,7 @@ class Parser {
   private statements: Statement[];
   private current: number;
   private id: number;
-  private variables: { [key: string]: Token };
+  private variables: { [key: string]: [Token, number] };
 
   constructor(code: string) {
     const tokenizer = new Tokenizer(code);
@@ -43,7 +43,7 @@ class Parser {
     return this.statements;
   }
 
-  getVariables(): { [key: string]: Token } {
+  getVariables(): { [key: string]: [Token, number] } {
     return this.variables;
   }
 
@@ -289,9 +289,14 @@ class Parser {
 
   private primary(): Expression {
     const token = this.getNextToken();
-    if (token.type === TokenType.VARIABLE) {
+    if (token.type === TokenType.VARIABLE && !this.variables[token.lexeme]) {
+      let length = 32;
+      if (this.isNextToken(TokenType.COLON)) {
+        this.expect(TokenType.COLON);
+        length = Number(this.expect(TokenType.INTEGER).lexeme);
+      }
       if (!gameVariables.includes(token.lexeme)) {
-        this.variables[token.lexeme] = token;
+        this.variables[token.lexeme] = [token, length];
       }
     }
     if (token.type === TokenType.LEFT_PAREN) {

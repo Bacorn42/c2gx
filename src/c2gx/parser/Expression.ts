@@ -3,6 +3,8 @@ import VariableRecord, { VariableRecordMap } from "../compiler/VariableRecord";
 import VariableState from "../compiler/VariableState";
 import Token from "../tokenizer/Token";
 import TokenType from "../tokenizer/TokenType";
+import Parser from "./Parser";
+import { ExpressionStatement } from "./Statement";
 import { LiteralExpressionFactory } from "./testUtil";
 
 abstract class Expression {
@@ -153,6 +155,23 @@ class AssignExpression extends Expression {
     this.exprRight = this.replaceVariable(this.exprRight, vars, output);
   }
 
+  replaceRuntime(output: VariableRecordMap) {
+    const variable = output[this.variable.lexeme];
+    if (variable.state === VariableState.RUNTIME) {
+      const runtimeVariable = new RuntimeVariableExpression(variable);
+      this.variable.lexeme = runtimeVariable.getRegister();
+      const mod = 2 ** variable.length;
+      const bitshiftRight = 2 ** (32 - variable.length - variable.start);
+
+      const modStr = mod << 0 === 0 ? "" : ` % ${mod}`;
+      const bitshiftRightStr = bitshiftRight > 1 ? ` * ${bitshiftRight}` : "";
+
+      const newExprStr = `${runtimeVariable.getRegister()} | ((${this.exprRight.translate()}${modStr})${bitshiftRightStr})`;
+      const parser = new Parser(newExprStr);
+      this.exprRight = (parser.getStatements()[0] as ExpressionStatement).getExpr();
+    }
+  }
+
   toString(): string {
     return `AssignExpression(${this.variable.lexeme} ${this.operator.lexeme} ${this.exprRight})`;
   }
@@ -251,7 +270,7 @@ class RuntimeVariableExpression extends Expression {
     return (2 ** this.record.length - 1) << (32 - this.record.length - (this.record.start % 32));
   }
 
-  private getRegister(): string {
+  getRegister(): string {
     if (this.record.start < 32) {
       return "reg1";
     } else if (this.record.start < 64) {

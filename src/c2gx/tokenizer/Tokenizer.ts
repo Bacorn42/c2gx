@@ -95,6 +95,9 @@ class Tokenizer {
       case '"':
         this.processString();
         break;
+      case ":":
+        this.processColon();
+        break;
       case "#":
         this.processLabel();
         break;
@@ -208,6 +211,10 @@ class Tokenizer {
     }
     this.getNextChar();
     this.addToken(TokenType.STRING);
+  }
+
+  private processColon(): void {
+    this.addToken(TokenType.COLON);
   }
 
   private processLabel(): void {

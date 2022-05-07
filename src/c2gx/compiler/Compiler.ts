@@ -26,6 +26,7 @@ class Compiler {
   compile(): string {
     const parser = new Parser(this.code);
     const statements = parser.getStatements();
+    const variables = parser.getVariables();
 
     let newCode = "";
     for (const statement of statements) {
@@ -34,9 +35,12 @@ class Compiler {
 
     const newParser = new Parser(newCode);
     const newStatements = newParser.getStatements();
-    const variables = newParser.getVariables();
+    const newVariables = newParser.getVariables();
+    for (const variable in variables) {
+      newVariables[variable] = [newVariables[variable][0], variables[variable][1]];
+    }
 
-    const blocks = this.optimize(newStatements, variables);
+    const blocks = this.optimize(newStatements, newVariables);
     newCode = "";
     for (const block of blocks) {
       newCode += block.statement.output();
@@ -45,7 +49,7 @@ class Compiler {
     return newCode;
   }
 
-  private optimize(statements: Statement[], variables: Record<string, Token>): Block[] {
+  private optimize(statements: Statement[], variables: Record<string, [Token, number]>): Block[] {
     let lastOutput: VariableRecordMap = {};
     let lastBlockCount = 0;
     while (true) {
@@ -177,6 +181,12 @@ class Compiler {
       this.getVariableStorage(output);
       for (const block of blocks) {
         block.statement.replace(block.input, output);
+        if (block.statement instanceof ExpressionStatement) {
+          const expr = block.statement.getExpr();
+          if (expr instanceof AssignExpression) {
+            expr.replaceRuntime(output);
+          }
+        }
       }
     }
     return blocks;
@@ -201,9 +211,8 @@ class Compiler {
     let start = 0;
     for (const [variable, record] of Object.entries(output)) {
       if (record.state === VariableState.RUNTIME) {
-        const length = 32;
-        output[variable].setBits(start, length);
-        start += length;
+        output[variable].setStart(start);
+        start += record.length;
       }
     }
   }

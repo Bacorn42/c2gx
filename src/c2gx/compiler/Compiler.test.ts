@@ -276,15 +276,17 @@ describe("Compiler", () => {
     it("Should not remove runtime variables", () => {
       const code = 'var1 = level  var2 = var1 + 1  map "level.c2m"  var3 = var1 + 5';
       const expectedValue = 'var1 = level\nmap "level.c2m"';
-      expect(new Compiler(code).compile()).toMatch(expectedValue);
+      const options: CompilerOptions = { noRuntimeVariableReplacement: true };
+      expect(new Compiler(code, options).compile()).toMatch(expectedValue);
     });
 
     it("Should not remove runtime variables through indirect usage", () => {
       const code = 'var1 = level  var2 = var1 + 1  map "level.c2m"  var3 = var2 + 5';
       const expectedValue = 'var1 = level\nmap "level.c2m"';
       const unexpectedValue = "var3";
-      expect(new Compiler(code).compile()).toMatch(expectedValue);
-      expect(new Compiler(code).compile()).not.toMatch(unexpectedValue);
+      const options: CompilerOptions = { noRuntimeVariableReplacement: true };
+      expect(new Compiler(code, options).compile()).toMatch(expectedValue);
+      expect(new Compiler(code, options).compile()).not.toMatch(unexpectedValue);
     });
 
     it("Should replace constant variables with their value", () => {
@@ -303,7 +305,28 @@ describe("Compiler", () => {
 
     it("Should replace runtime variables", () => {
       const code = 'var1 = level   var2 = 5  var3 = var2 * 2  map "level.c2m"  var1 = var1 + var3';
-      const expectedValue = 'var1 = level\nmap "level.c2m"\nvar1 = (((reg1))) + 10';
+      const expectedValue = 'reg1 = reg1 | level\nmap "level.c2m"\nreg1 = reg1 | reg1 + 10';
+      expect(new Compiler(code).compile()).toMatch(expectedValue);
+    });
+
+    it("Should replace runtime variables with nondefault length", () => {
+      const code = 'var1 : 4 = level    map "level.c2m"    var2 = var1';
+      const expectedValue = 'reg1 = reg1 | level % 16 * 268435456\nmap "level.c2m"';
+      expect(new Compiler(code).compile()).toMatch(expectedValue);
+    });
+
+    it("Should replace runtime variables with nondefault start", () => {
+      const code = 'var1 : 4 = level    var2 : 4 = level    map "level.c2m"    var3 = var1 + var2';
+      const expectedValue =
+        'reg1 = reg1 | level % 16 * 268435456\nreg1 = reg1 | level % 16 * 16777216\nmap "level.c2m"';
+      expect(new Compiler(code).compile()).toMatch(expectedValue);
+    });
+
+    it("Should replace runtime variables with nondefault params on both sides of assignment", () => {
+      const code =
+        'var1 : 4 = level    var2 : 4 = var2 + level    map "level.c2m"    var3 = var1 + var2';
+      const expectedValue =
+        'reg1 = reg1 | level % 16 * 268435456\nreg1 = reg1 | reg1 & 251658240 * 16 / 268435456 + level % 16 * 16777216\nmap "level.c2m"';
       expect(new Compiler(code).compile()).toMatch(expectedValue);
     });
   });

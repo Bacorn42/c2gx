@@ -5,16 +5,16 @@ class VariableRecord {
   value: Expression;
   state: VariableState;
   start: number = 0;
-  length: number = 0;
+  length: number;
 
-  constructor(value: Expression, state: VariableState) {
+  constructor(value: Expression, state: VariableState, length: number = 32) {
     this.value = value;
     this.state = state;
+    this.length = length;
   }
 
-  setBits(start: number, length: number) {
+  setStart(start: number) {
     this.start = start;
-    this.length = length;
   }
 }
 

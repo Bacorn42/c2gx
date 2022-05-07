@@ -31,8 +31,7 @@ describe("Tokenizer", () => {
     });
 
     it("Should tokenize directives and keywords", () => {
-      const code =
-        "game map music script if elseif else end while for from to by";
+      const code = "game map music script if elseif else end while for from to by";
       const expectedTokens = [
         new Token(TokenType.GAME, "game", 1),
         new Token(TokenType.MAP, "map", 1),
@@ -92,7 +91,7 @@ describe("Tokenizer", () => {
     });
 
     it("Should tokenize other", () => {
-      const code = "( 1 + 2 ) goto #label";
+      const code = "( 1 + 2 ) goto #label :";
       const expectedTokens = [
         new Token(TokenType.LEFT_PAREN, "(", 1),
         new Token(TokenType.INTEGER, "1", 1),
@@ -101,6 +100,7 @@ describe("Tokenizer", () => {
         new Token(TokenType.RIGHT_PAREN, ")", 1),
         new Token(TokenType.GOTO, "goto", 1),
         new Token(TokenType.LABEL, "#label", 1),
+        new Token(TokenType.COLON, ":", 1),
         new Token(TokenType.EOF, "", 1),
       ];
       const tokenizer = new Tokenizer(code);

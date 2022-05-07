@@ -46,15 +46,23 @@ describe("Expression", () => {
     });
 
     it("Should translate runtime variable expression", () => {
-      const variable = new VariableRecord(LiteralExpressionFactory("var1"), VariableState.RUNTIME);
-      variable.setBits(0, 32);
+      const variable = new VariableRecord(
+        LiteralExpressionFactory("var1"),
+        VariableState.RUNTIME,
+        32
+      );
+      variable.setStart(0);
       const expr = new RuntimeVariableExpression(variable);
       expect(expr.translate()).toStrictEqual("(((reg1)))");
     });
 
     it("Should translate runtime variable expression with nondefault params", () => {
-      const variable = new VariableRecord(LiteralExpressionFactory("var1"), VariableState.RUNTIME);
-      variable.setBits(5, 8);
+      const variable = new VariableRecord(
+        LiteralExpressionFactory("var1"),
+        VariableState.RUNTIME,
+        8
+      );
+      variable.setStart(5);
       const expr = new RuntimeVariableExpression(variable);
       expect(expr.translate()).toStrictEqual("(((reg1 & 133693440) * 32) / 16777216)");
     });

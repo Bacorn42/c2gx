@@ -57,7 +57,7 @@ class Graph {
     this.blocks.unshift(entryBlock);
   }
 
-  iterativeConstantAnalysis(variables: { [key: string]: Token }): void {
+  iterativeConstantAnalysis(variables: { [key: string]: [Token, number] }): void {
     this.initializeBlocks(variables);
 
     let changed = true;
@@ -93,13 +93,14 @@ class Graph {
     return simpleBlocks;
   }
 
-  private initializeBlocks(variables: { [key: string]: Token }): void {
+  private initializeBlocks(variables: { [key: string]: [Token, number] }): void {
     for (const block of this.blocks) {
       const vars: VariableRecordMap = {};
       for (const variable in variables) {
         vars[variable] = new VariableRecord(
           LiteralExpressionFactory(variable),
-          VariableState.UNDEFINED
+          VariableState.UNDEFINED,
+          variables[variable][1]
         );
       }
       block.output = vars;
@@ -112,7 +113,11 @@ class Graph {
       if (block.output !== null) {
         for (const [variable, record] of Object.entries(block.output)) {
           if (vars[variable] === undefined) {
-            vars[variable] = new VariableRecord(record.value.evaluate(), record.state);
+            vars[variable] = new VariableRecord(
+              record.value.evaluate(),
+              record.state,
+              record.length
+            );
           } else {
             if (
               vars[variable].state === VariableState.CONSTANT &&
@@ -135,7 +140,7 @@ class Graph {
     let changed = false;
     const vars: VariableRecordMap = {};
     for (const [variable, record] of Object.entries(block.input)) {
-      vars[variable] = new VariableRecord(record.value.evaluate(), record.state);
+      vars[variable] = new VariableRecord(record.value.evaluate(), record.state, record.length);
     }
     const statement = block.statement;
     if (statement instanceof MapStatement) {
@@ -171,7 +176,7 @@ class Graph {
   }
 
   // Usage of a potentially runtime variable in an assignment causes it to become runtime,
-  // Assignment is generally constant, expect in the case of assigning to self if it's at least
+  // Assignment is generally constant, except in the case of assigning to self if it's at least
   // potentially runtime, e.g. var1 = var1 + 1
   private transferExpression(vars: VariableRecordMap, statement: ExpressionStatement): void {
     const expr = statement.getExpr();
@@ -190,7 +195,11 @@ class Graph {
           newState = VariableState.RUNTIME;
         }
       }
-      vars[expr.variable.lexeme] = new VariableRecord(expr.exprRight.evaluate(), newState);
+      vars[expr.variable.lexeme] = new VariableRecord(
+        expr.exprRight.evaluate(),
+        newState,
+        vars[expr.variable.lexeme].length
+      );
     }
   }
 

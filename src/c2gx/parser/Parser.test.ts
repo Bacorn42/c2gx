@@ -115,6 +115,9 @@ describe("Parser", () => {
       ];
       const parser = new Parser(code);
       expect(parser.getStatements()).toStrictEqual(expectedStatements);
+      expect(parser.getVariables()).toStrictEqual({
+        var: [new Token(TokenType.VARIABLE, "var", 1), 32],
+      });
     });
 
     it("Should throw error on assignment to non-variable", () => {
@@ -122,6 +125,24 @@ describe("Parser", () => {
       expect(() => {
         new Parser(code);
       }).toThrow("Cannot assign");
+    });
+
+    it("Should parse assignment with length provided", () => {
+      const code = "var : 8 = 1";
+      const expectedStatements = [
+        new ExpressionStatement(
+          new AssignExpression(
+            new Token(TokenType.VARIABLE, "var", 1),
+            new Token(TokenType.EQUAL, "=", 1),
+            LiteralExpressionFactory(1)
+          )
+        ),
+      ];
+      const parser = new Parser(code);
+      expect(parser.getStatements()).toStrictEqual(expectedStatements);
+      expect(parser.getVariables()).toStrictEqual({
+        var: [new Token(TokenType.VARIABLE, "var", 1), 8],
+      });
     });
 
     it("Should parse game expression", () => {

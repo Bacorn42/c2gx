@@ -48,6 +48,7 @@ enum TokenType {
   //Other
   LEFT_PAREN,
   RIGHT_PAREN,
+  COLON,
   LABEL,
   GOTO,
   OTHER,
