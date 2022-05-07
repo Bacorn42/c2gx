@@ -112,13 +112,13 @@ class Graph {
       if (block.output !== null) {
         for (const [variable, record] of Object.entries(block.output)) {
           if (vars[variable] === undefined) {
-            vars[variable] = new VariableRecord(record.value, record.state);
+            vars[variable] = new VariableRecord(record.value.evaluate(), record.state);
           } else {
             if (
               vars[variable].state === VariableState.CONSTANT &&
               record.state === VariableState.CONSTANT
             ) {
-              if (vars[variable].value?.toString() !== record.value?.toString()) {
+              if (vars[variable].value.toString() !== record.value.toString()) {
                 vars[variable].state = VariableState.POTENTIALLY_RUNTIME;
               }
             } else {
@@ -135,7 +135,7 @@ class Graph {
     let changed = false;
     const vars: VariableRecordMap = {};
     for (const [variable, record] of Object.entries(block.input)) {
-      vars[variable] = new VariableRecord(record.value, record.state);
+      vars[variable] = new VariableRecord(record.value.evaluate(), record.state);
     }
     const statement = block.statement;
     if (statement instanceof MapStatement) {
@@ -148,7 +148,7 @@ class Graph {
 
     for (const [variable, record] of Object.entries(block.output)) {
       if (
-        vars[variable]?.value?.toString() !== record.value?.toString() ||
+        vars[variable]?.value.toString() !== record.value.toString() ||
         vars[variable]?.state !== record.state
       ) {
         changed = true;
@@ -161,12 +161,10 @@ class Graph {
   // all variables that directly use game variables are potentially runtime
   private transferMap(vars: VariableRecordMap): void {
     for (const [variable, record] of Object.entries(vars)) {
-      if (record.value !== null) {
-        const usedVariables = this.getUsedVariables(record.value, vars);
-        if ([...usedVariables].filter((v) => gameVariables.includes(v)).length > 0) {
-          if (record.state === VariableState.UNDEFINED || record.state === VariableState.CONSTANT) {
-            vars[variable].state = VariableState.POTENTIALLY_RUNTIME;
-          }
+      const usedVariables = this.getUsedVariables(record.value, vars);
+      if ([...usedVariables].filter((v) => gameVariables.includes(v)).length > 0) {
+        if (record.state === VariableState.UNDEFINED || record.state === VariableState.CONSTANT) {
+          vars[variable].state = VariableState.POTENTIALLY_RUNTIME;
         }
       }
     }
@@ -192,7 +190,7 @@ class Graph {
           newState = VariableState.RUNTIME;
         }
       }
-      vars[expr.variable.lexeme] = new VariableRecord(expr.exprRight, newState);
+      vars[expr.variable.lexeme] = new VariableRecord(expr.exprRight.evaluate(), newState);
     }
   }
 
@@ -229,7 +227,7 @@ class Graph {
       const variables = [...usedVariables];
       for (const variable of variables) {
         if (!gameVariables.includes(variable)) {
-          vars[variable]?.value?.traverse(getExpressionVariables);
+          vars[variable]?.value.traverse(getExpressionVariables);
         } else if (!gameVariablesInExpression.has(variable)) {
           usedVariables.delete(variable);
         }

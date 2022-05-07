@@ -239,7 +239,7 @@ describe("Compiler", () => {
     it("Should remove useless expressions", () => {
       const code = "1  2+3*4-5  var1 = 5  var2 = 6*7-8+9";
       const expectedValue = "";
-      expect(new Compiler(code).compile()).toMatch(expectedValue);
+      expect(new Compiler(code).compile()).toStrictEqual(expectedValue);
     });
 
     it("Should remove useless expressions from within if statements", () => {
@@ -261,7 +261,7 @@ describe("Compiler", () => {
     it("Should remove a useless infinite loop", () => {
       const code = "while 1 < 2 1 2 end";
       const expectedValue = "";
-      expect(new Compiler(code).compile()).toMatch(expectedValue);
+      expect(new Compiler(code).compile()).toStrictEqual(expectedValue);
     });
 
     it("Should remove constant and potentially runtime variables", () => {
@@ -282,6 +282,18 @@ describe("Compiler", () => {
       const unexpectedValue = "var3";
       expect(new Compiler(code).compile()).toMatch(expectedValue);
       expect(new Compiler(code).compile()).not.toMatch(unexpectedValue);
+    });
+
+    it("Should replace constant variables with their value", () => {
+      const code = 'var1 = level  var2 = 5  map "level.c2m"  var1 = var1 + var2';
+      const expectedValue = 'var1 = level\nmap "level.c2m"\nvar1 = var1 + 5';
+      expect(new Compiler(code).compile()).toMatch(expectedValue);
+    });
+
+    it("Should replace constant variables with their value even through indirection", () => {
+      const code = 'var1 = level   var2 = 5  var3 = var2 * 2  map "level.c2m"  var1 = var1 + var3';
+      const expectedValue = 'var1 = level\nmap "level.c2m"\nvar1 = var1 + 10';
+      expect(new Compiler(code).compile()).toMatch(expectedValue);
     });
   });
 });
