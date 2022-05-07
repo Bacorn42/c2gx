@@ -59,7 +59,7 @@ class Compiler {
       for (const block of blocks) {
         const input = Object.fromEntries(
           Object.entries(block.input).filter(
-            ([v, record]) => record.state !== VariableState.RUNTIME
+            ([v, record]) => output[v].state !== VariableState.RUNTIME
           )
         );
         block.statement.replace(input, output);
@@ -73,7 +73,7 @@ class Compiler {
       }
       if (this.isSameOutput(lastOutput, output) && lastBlockCount === blocks.length) {
         if (!this.options.noVariableReplacement) {
-          blocks = this.replaceVariables(blocks, output, variables);
+          blocks = this.replaceVariables(blocks, output);
         }
         return blocks;
       }
@@ -171,12 +171,14 @@ class Compiler {
     return blocks;
   }
 
-  private replaceVariables(
-    blocks: Block[],
-    output: VariableRecordMap,
-    variables: Record<string, Token>
-  ): Block[] {
+  private replaceVariables(blocks: Block[], output: VariableRecordMap): Block[] {
     blocks = this.removeConstants(blocks, output);
+    if (!this.options.noRuntimeVariableReplacement) {
+      this.getVariableStorage(output);
+      for (const block of blocks) {
+        block.statement.replace(block.input, output);
+      }
+    }
     return blocks;
   }
 
@@ -193,6 +195,17 @@ class Compiler {
       }
     }
     return this.removeEmptyBlocks(blocks);
+  }
+
+  private getVariableStorage(output: VariableRecordMap): void {
+    let start = 0;
+    for (const [variable, record] of Object.entries(output)) {
+      if (record.state === VariableState.RUNTIME) {
+        const length = 32;
+        output[variable].setBits(start, length);
+        start += length;
+      }
+    }
   }
 
   private getLabels(blocks: Block[]): Set<string> {

@@ -1,3 +1,5 @@
+import VariableRecord from "../compiler/VariableRecord";
+import VariableState from "../compiler/VariableState";
 import Token from "../tokenizer/Token";
 import TokenType from "../tokenizer/TokenType";
 import {
@@ -5,6 +7,7 @@ import {
   BinaryExpression,
   GroupExpression,
   LiteralExpression,
+  RuntimeVariableExpression,
 } from "./Expression";
 import { BinaryExpressionFactory, LiteralExpressionFactory } from "./testUtil";
 
@@ -40,6 +43,20 @@ describe("Expression", () => {
 
       const expr3 = LiteralExpressionFactory("var");
       expect(expr3.translate()).toStrictEqual("var");
+    });
+
+    it("Should translate runtime variable expression", () => {
+      const variable = new VariableRecord(LiteralExpressionFactory("var1"), VariableState.RUNTIME);
+      variable.setBits(0, 32);
+      const expr = new RuntimeVariableExpression(variable);
+      expect(expr.translate()).toStrictEqual("(((reg1)))");
+    });
+
+    it("Should translate runtime variable expression with nondefault params", () => {
+      const variable = new VariableRecord(LiteralExpressionFactory("var1"), VariableState.RUNTIME);
+      variable.setBits(5, 8);
+      const expr = new RuntimeVariableExpression(variable);
+      expect(expr.translate()).toStrictEqual("(((reg1 & 133693440) * 32) / 16777216)");
     });
   });
 

@@ -1,5 +1,5 @@
 import gameVariables from "../compiler/gameVariables";
-import { VariableRecordMap } from "../compiler/VariableRecord";
+import VariableRecord, { VariableRecordMap } from "../compiler/VariableRecord";
 import VariableState from "../compiler/VariableState";
 import Token from "../tokenizer/Token";
 import TokenType from "../tokenizer/TokenType";
@@ -74,7 +74,7 @@ abstract class Expression {
           if (output[variable].state !== VariableState.RUNTIME) {
             return vars[variable].value as Expression;
           }
-          return LiteralExpressionFactory(variable);
+          return new RuntimeVariableExpression(output[variable]);
         }
       }
     }
@@ -217,6 +217,65 @@ class LiteralExpression extends Expression {
   }
 }
 
+class RuntimeVariableExpression extends Expression {
+  private record: VariableRecord;
+
+  constructor(record: VariableRecord) {
+    super();
+    this.record = record;
+  }
+
+  translate(): string {
+    const mask = this.getMask();
+    const register = this.getRegister();
+    const bitshiftLeft = 2 ** (this.record.start % 32);
+    const bitshiftRight = 2 ** (32 - this.record.length);
+
+    const maskStr = mask === -1 ? "" : ` & ${mask}`;
+    const bitshiftLeftStr = bitshiftLeft > 1 ? ` * ${bitshiftLeft}` : "";
+    const bitshiftRightStr = bitshiftRight > 1 ? ` / ${bitshiftRight}` : "";
+    return `(((${register}${maskStr})${bitshiftLeftStr})${bitshiftRightStr})`;
+  }
+
+  evaluate(): Expression {
+    return this;
+  }
+
+  traverse(process: (expr: Expression) => void): void {
+    process(this);
+  }
+
+  replace(vars: VariableRecordMap, output: VariableRecordMap): void {}
+
+  private getMask(): number {
+    return (2 ** this.record.length - 1) << (32 - this.record.length - (this.record.start % 32));
+  }
+
+  private getRegister(): string {
+    if (this.record.start < 32) {
+      return "reg1";
+    } else if (this.record.start < 64) {
+      return "reg2";
+    } else if (this.record.start < 96) {
+      return "reg3";
+    } else if (this.record.start < 128) {
+      return "reg4";
+    } else {
+      return "result";
+    }
+  }
+
+  toString(): string {
+    return `RuntimeVariableExpression(${this.record.value})`;
+  }
+}
+
 export default Expression;
 
-export { BinaryExpression, AssignExpression, GroupExpression, LiteralExpression };
+export {
+  BinaryExpression,
+  AssignExpression,
+  GroupExpression,
+  LiteralExpression,
+  RuntimeVariableExpression,
+};

@@ -148,7 +148,10 @@ describe("Compiler", () => {
         "\ngoto #for0" +
         "\n#endfor0";
 
-      const options: CompilerOptions = { noUselessExpressionRemoval: true };
+      const options: CompilerOptions = {
+        noUselessExpressionRemoval: true,
+        noVariableReplacement: true,
+      };
       expect(new Compiler(code, options).compile()).toMatch(expectedValue);
     });
 
@@ -287,12 +290,20 @@ describe("Compiler", () => {
     it("Should replace constant variables with their value", () => {
       const code = 'var1 = level  var2 = 5  map "level.c2m"  var1 = var1 + var2';
       const expectedValue = 'var1 = level\nmap "level.c2m"\nvar1 = var1 + 5';
-      expect(new Compiler(code).compile()).toMatch(expectedValue);
+      const options: CompilerOptions = { noRuntimeVariableReplacement: true };
+      expect(new Compiler(code, options).compile()).toMatch(expectedValue);
     });
 
     it("Should replace constant variables with their value even through indirection", () => {
       const code = 'var1 = level   var2 = 5  var3 = var2 * 2  map "level.c2m"  var1 = var1 + var3';
       const expectedValue = 'var1 = level\nmap "level.c2m"\nvar1 = var1 + 10';
+      const options: CompilerOptions = { noRuntimeVariableReplacement: true };
+      expect(new Compiler(code, options).compile()).toMatch(expectedValue);
+    });
+
+    it("Should replace runtime variables", () => {
+      const code = 'var1 = level   var2 = 5  var3 = var2 * 2  map "level.c2m"  var1 = var1 + var3';
+      const expectedValue = 'var1 = level\nmap "level.c2m"\nvar1 = (((reg1))) + 10';
       expect(new Compiler(code).compile()).toMatch(expectedValue);
     });
   });
