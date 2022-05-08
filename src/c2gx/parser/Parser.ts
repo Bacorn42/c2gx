@@ -179,7 +179,19 @@ class Parser {
 
   private assignment(): Expression {
     const expr = this.or();
-    if (this.isNextToken(TokenType.EQUAL)) {
+    if (
+      this.isNextToken(
+        TokenType.EQUAL,
+        TokenType.AND_EQUAL,
+        TokenType.OR_EQUAL,
+        TokenType.XOR_EQUAL,
+        TokenType.MOD_EQUAL,
+        TokenType.PLUS_EQUAL,
+        TokenType.MINUS_EQUAL,
+        TokenType.TIMES_EQUAL,
+        TokenType.DIVIDE_EQUAL
+      )
+    ) {
       const operator = this.getNextToken();
       const exprRight = this.or();
       if (expr instanceof LiteralExpression && expr.token.type === TokenType.VARIABLE) {

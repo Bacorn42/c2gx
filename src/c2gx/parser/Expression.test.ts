@@ -18,13 +18,30 @@ describe("Expression", () => {
       expect(expr.translate()).toStrictEqual("1 + 2");
     });
 
-    it("Should translate assignment expression", () => {
+    it("Should translate equal assignment expression", () => {
       const expr = new AssignExpression(
         new Token(TokenType.VARIABLE, "var", 1),
         new Token(TokenType.EQUAL, "=", 1),
         LiteralExpressionFactory(1)
       );
       expect(expr.translate()).toStrictEqual("var = 1");
+    });
+
+    it("Should translate compound assignment operators", () => {
+      const expr1 = new AssignExpression(
+        new Token(TokenType.VARIABLE, "var", 1),
+        new Token(TokenType.PLUS_EQUAL, "+=", 1),
+        LiteralExpressionFactory(1)
+      );
+
+      const expr2 = new AssignExpression(
+        new Token(TokenType.VARIABLE, "var", 1),
+        new Token(TokenType.PLUS_EQUAL, "^=", 1),
+        LiteralExpressionFactory(1)
+      );
+
+      expect(expr1.translate()).toStrictEqual("var = var + 1");
+      expect(expr2.translate()).toStrictEqual("var = var ^ 1");
     });
 
     it("Should translate group expression", () => {

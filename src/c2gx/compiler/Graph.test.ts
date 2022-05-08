@@ -26,7 +26,7 @@ const getGraph = (code: string): Graph => {
   return new Graph(parse(code));
 };
 
-const getVariables = (code: string): { [key: string]: Token } => {
+const getVariables = (code: string): { [key: string]: [Token, number] } => {
   return new Parser(code).getVariables();
 };
 

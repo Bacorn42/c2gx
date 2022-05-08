@@ -13,6 +13,16 @@ describe("Compiler", () => {
       expect(new Compiler(code, options).compile()).toMatch(expectedValue);
     });
 
+    it("Should compile compound assignment", () => {
+      const code = "var += 1";
+      const expectedValue = "var = var + 1";
+      const options: CompilerOptions = {
+        noVariableReplacement: true,
+        noUselessExpressionRemoval: true,
+      };
+      expect(new Compiler(code, options).compile()).toMatch(expectedValue);
+    });
+
     it("Should evaluate basic expression", () => {
       const code = "2 * (3 + 4) - 1    12 / 4    14 / 4    14 % 4";
       const expectedValue = "13\n3\n3\n2";
@@ -167,8 +177,12 @@ describe("Compiler", () => {
     it("Should remove unreachable if statement", () => {
       const code = "if 1 > 2 3 end";
       const expectedValue = "";
+      const unexpectedValue1 = "1";
+      const unexpectedValue2 = "3";
       const options: CompilerOptions = { noUselessExpressionRemoval: true };
       expect(new Compiler(code, options).compile()).toMatch(expectedValue);
+      expect(new Compiler(code, options).compile()).not.toMatch(unexpectedValue1);
+      expect(new Compiler(code, options).compile()).not.toMatch(unexpectedValue2);
     });
 
     it("Should remove unreachable elseif", () => {
@@ -300,6 +314,28 @@ describe("Compiler", () => {
       const code = 'var1 = level   var2 = 5  var3 = var2 * 2  map "level.c2m"  var1 = var1 + var3';
       const expectedValue = 'var1 = level\nmap "level.c2m"\nvar1 = var1 + 10';
       const options: CompilerOptions = { noRuntimeVariableReplacement: true };
+      expect(new Compiler(code, options).compile()).toMatch(expectedValue);
+    });
+
+    it("Should replace constant variables that use compound assignment", () => {
+      const code = "var1 = 5    var1 += 6    var2 = var1 * 10";
+      const expectedValue = "var1 = 5\nvar1 = 11\nvar2 = 110";
+      const options: CompilerOptions = {
+        noCodeRemoval: true,
+        noVariableReplacement: true,
+      };
+      expect(new Compiler(code, options).compile()).toMatch(expectedValue);
+    });
+
+    it("Should replace constant variables indirectly with compound assignment", () => {
+      const code =
+        "var1 = 2  var1 += 3  var2 = var1 + 5  var1 -= 1  var2 *= 3  var3 = var1 + var2  var3 += 5";
+      const expectedValue =
+        "var1 = 2\nvar1 = 5\nvar2 = 10\nvar1 = 4\nvar2 = 30\nvar3 = 34\nvar3 = 39";
+      const options: CompilerOptions = {
+        noCodeRemoval: true,
+        noVariableReplacement: true,
+      };
       expect(new Compiler(code, options).compile()).toMatch(expectedValue);
     });
 

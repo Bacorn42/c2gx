@@ -120,6 +120,24 @@ describe("Parser", () => {
       });
     });
 
+    it("Should parse compounds assignment", () => {
+      const code = "var += 1";
+      const expectedStatements = [
+        new ExpressionStatement(
+          new AssignExpression(
+            new Token(TokenType.VARIABLE, "var", 1),
+            new Token(TokenType.PLUS_EQUAL, "+=", 1),
+            LiteralExpressionFactory(1)
+          )
+        ),
+      ];
+      const parser = new Parser(code);
+      expect(parser.getStatements()).toStrictEqual(expectedStatements);
+      expect(parser.getVariables()).toStrictEqual({
+        var: [new Token(TokenType.VARIABLE, "var", 1), 32],
+      });
+    });
+
     it("Should throw error on assignment to non-variable", () => {
       const code = "1 = 2";
       expect(() => {

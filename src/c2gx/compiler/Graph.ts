@@ -59,6 +59,7 @@ class Graph {
 
   iterativeConstantAnalysis(variables: { [key: string]: [Token, number] }): void {
     this.initializeBlocks(variables);
+    debugger;
 
     let changed = true;
     while (changed) {
@@ -113,11 +114,7 @@ class Graph {
       if (block.output !== null) {
         for (const [variable, record] of Object.entries(block.output)) {
           if (vars[variable] === undefined) {
-            vars[variable] = new VariableRecord(
-              record.value.evaluate(),
-              record.state,
-              record.length
-            );
+            vars[variable] = new VariableRecord(record.value, record.state, record.length);
           } else {
             if (
               vars[variable].state === VariableState.CONSTANT &&
@@ -140,7 +137,7 @@ class Graph {
     let changed = false;
     const vars: VariableRecordMap = {};
     for (const [variable, record] of Object.entries(block.input)) {
-      vars[variable] = new VariableRecord(record.value.evaluate(), record.state, record.length);
+      vars[variable] = new VariableRecord(record.value, record.state, record.length);
     }
     const statement = block.statement;
     if (statement instanceof MapStatement) {
@@ -181,7 +178,7 @@ class Graph {
   private transferExpression(vars: VariableRecordMap, statement: ExpressionStatement): void {
     const expr = statement.getExpr();
     if (expr instanceof AssignExpression) {
-      const usedVariables = this.getUsedVariables(expr, vars);
+      const usedVariables = this.getUsedVariables(expr.exprRight, vars);
       for (const variable of usedVariables) {
         if (!gameVariables.includes(variable)) {
           if (vars[variable].state === VariableState.POTENTIALLY_RUNTIME) {
@@ -195,8 +192,9 @@ class Graph {
           newState = VariableState.RUNTIME;
         }
       }
+
       vars[expr.variable.lexeme] = new VariableRecord(
-        expr.exprRight.evaluate(),
+        expr.exprRight,
         newState,
         vars[expr.variable.lexeme].length
       );

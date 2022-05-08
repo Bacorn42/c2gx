@@ -158,6 +158,9 @@ class Tokenizer {
     if (nextChar === "&") {
       this.getNextChar();
       this.addToken(TokenType.AND_AND);
+    } else if (nextChar === "=") {
+      this.getNextChar();
+      this.addToken(TokenType.AND_EQUAL);
     } else {
       this.addToken(TokenType.AND);
     }
@@ -168,33 +171,72 @@ class Tokenizer {
     if (nextChar === "|") {
       this.getNextChar();
       this.addToken(TokenType.OR_OR);
+    } else if (nextChar === "=") {
+      this.getNextChar();
+      this.addToken(TokenType.OR_EQUAL);
     } else {
       this.addToken(TokenType.OR);
     }
   }
 
   private processXor(): void {
-    this.addToken(TokenType.XOR);
+    const nextChar = this.getChar();
+    if (nextChar === "=") {
+      this.getNextChar();
+      this.addToken(TokenType.XOR_EQUAL);
+    } else {
+      this.addToken(TokenType.XOR);
+    }
   }
 
   private processMod(): void {
-    this.addToken(TokenType.MOD);
+    const nextChar = this.getChar();
+    if (nextChar === "=") {
+      this.getNextChar();
+      this.addToken(TokenType.MOD_EQUAL);
+    } else {
+      this.addToken(TokenType.MOD);
+    }
   }
 
   private processPlus(): void {
-    this.addToken(TokenType.PLUS);
+    const nextChar = this.getChar();
+    if (nextChar === "=") {
+      this.getNextChar();
+      this.addToken(TokenType.PLUS_EQUAL);
+    } else {
+      this.addToken(TokenType.PLUS);
+    }
   }
 
   private processMinus(): void {
-    this.addToken(TokenType.MINUS);
+    const nextChar = this.getChar();
+    if (nextChar === "=") {
+      this.getNextChar();
+      this.addToken(TokenType.MINUS_EQUAL);
+    } else {
+      this.addToken(TokenType.MINUS);
+    }
   }
 
   private processTimes(): void {
-    this.addToken(TokenType.TIMES);
+    const nextChar = this.getChar();
+    if (nextChar === "=") {
+      this.getNextChar();
+      this.addToken(TokenType.TIMES_EQUAL);
+    } else {
+      this.addToken(TokenType.TIMES);
+    }
   }
 
   private processDivide(): void {
-    this.addToken(TokenType.DIVIDE);
+    const nextChar = this.getChar();
+    if (nextChar === "=") {
+      this.getNextChar();
+      this.addToken(TokenType.DIVIDE_EQUAL);
+    } else {
+      this.addToken(TokenType.DIVIDE);
+    }
   }
 
   private processLeftParen(): void {

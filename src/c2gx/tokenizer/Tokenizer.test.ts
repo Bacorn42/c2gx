@@ -5,7 +5,7 @@ import Tokenizer from "./Tokenizer";
 describe("Tokenizer", () => {
   describe("Basic tokenization", () => {
     it("Should tokenize operators", () => {
-      const code = "+ - * / = == != > >= < <= & && | || ^ %";
+      const code = "+ - * / = == != > >= < <= & && | || ^ % &= |= ^= %= += -= *= /=";
       const expectedTokens = [
         new Token(TokenType.PLUS, "+", 1),
         new Token(TokenType.MINUS, "-", 1),
@@ -24,6 +24,14 @@ describe("Tokenizer", () => {
         new Token(TokenType.OR_OR, "||", 1),
         new Token(TokenType.XOR, "^", 1),
         new Token(TokenType.MOD, "%", 1),
+        new Token(TokenType.AND_EQUAL, "&=", 1),
+        new Token(TokenType.OR_EQUAL, "|=", 1),
+        new Token(TokenType.XOR_EQUAL, "^=", 1),
+        new Token(TokenType.MOD_EQUAL, "%=", 1),
+        new Token(TokenType.PLUS_EQUAL, "+=", 1),
+        new Token(TokenType.MINUS_EQUAL, "-=", 1),
+        new Token(TokenType.TIMES_EQUAL, "*=", 1),
+        new Token(TokenType.DIVIDE_EQUAL, "/=", 1),
         new Token(TokenType.EOF, "", 1),
       ];
       const tokenizer = new Tokenizer(code);

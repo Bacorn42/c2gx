@@ -115,8 +115,8 @@ class BinaryExpression extends Expression {
   replace(vars: VariableRecordMap, output: VariableRecordMap): void {
     this.exprLeft.replace(vars, output);
     this.exprRight.replace(vars, output);
-    this.exprLeft = this.replaceVariable(this.exprLeft, vars, output);
-    this.exprRight = this.replaceVariable(this.exprRight, vars, output);
+    this.exprLeft = this.replaceVariable(this.exprLeft, vars, output).evaluate();
+    this.exprRight = this.replaceVariable(this.exprRight, vars, output).evaluate();
   }
 
   toString(): string {
@@ -137,7 +137,13 @@ class AssignExpression extends Expression {
   }
 
   translate(): string {
-    return `${this.variable.lexeme} ${this.operator.lexeme} ${this.exprRight.translate()}`;
+    if (this.operator.lexeme[0] === "=") {
+      return `${this.variable.lexeme} ${this.operator.lexeme} ${this.exprRight.translate()}`;
+    } else {
+      return `${this.variable.lexeme} = ${this.variable.lexeme} ${
+        this.operator.lexeme[0]
+      } ${this.exprRight.translate()}`;
+    }
   }
 
   evaluate(): Expression {
@@ -152,7 +158,7 @@ class AssignExpression extends Expression {
 
   replace(vars: VariableRecordMap, output: VariableRecordMap): void {
     this.exprRight.replace(vars, output);
-    this.exprRight = this.replaceVariable(this.exprRight, vars, output);
+    this.exprRight = this.replaceVariable(this.exprRight, vars, output).evaluate();
   }
 
   replaceRuntime(output: VariableRecordMap) {
@@ -201,7 +207,7 @@ class GroupExpression extends Expression {
 
   replace(vars: VariableRecordMap, output: VariableRecordMap): void {
     this.expr.replace(vars, output);
-    this.expr = this.replaceVariable(this.expr, vars, output);
+    this.expr = this.replaceVariable(this.expr, vars, output).evaluate();
   }
 
   toString(): string {

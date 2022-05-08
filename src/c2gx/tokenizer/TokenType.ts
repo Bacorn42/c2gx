@@ -37,6 +37,14 @@ enum TokenType {
   MINUS,
   TIMES,
   DIVIDE,
+  AND_EQUAL,
+  OR_EQUAL,
+  XOR_EQUAL,
+  MOD_EQUAL,
+  PLUS_EQUAL,
+  MINUS_EQUAL,
+  TIMES_EQUAL,
+  DIVIDE_EQUAL,
 
   //Whitespace
   SPACE,
