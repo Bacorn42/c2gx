@@ -59,7 +59,6 @@ class Graph {
 
   iterativeConstantAnalysis(variables: { [key: string]: [Token, number] }): void {
     this.initializeBlocks(variables);
-    debugger;
 
     let changed = true;
     while (changed) {

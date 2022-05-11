@@ -29,6 +29,7 @@ enum TokenType {
   GREATER,
   AND_AND,
   OR_OR,
+  NOT,
   AND,
   OR,
   XOR,

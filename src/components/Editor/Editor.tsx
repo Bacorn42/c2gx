@@ -1,0 +1,62 @@
+import React, { ChangeEvent, useState } from "react";
+import gameVariables from "../../c2gx/compiler/gameVariables";
+import Token from "../../c2gx/tokenizer/Token";
+import Tokenizer from "../../c2gx/tokenizer/Tokenizer";
+import TokenType from "../../c2gx/tokenizer/TokenType";
+import "./Editor.css";
+
+interface Props {
+  code: string;
+  codeHandler: (code: string) => void;
+}
+
+function Editor({ code, codeHandler }: Props) {
+  const [tokens, setTokens] = useState<Token[]>([]);
+
+  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    codeHandler(e.target.value);
+    setTokens(new Tokenizer(e.target.value).getTokens());
+  };
+
+  const getTokenClassName = (token: Token) => {
+    if (token.type === TokenType.VARIABLE) {
+      if (gameVariables.includes(token.lexeme)) {
+        return "Editor-GAME_VARIABLE";
+      }
+    }
+    return `Editor-${token.typeStr}`;
+  };
+
+  const getLines = () => {
+    if (tokens.length === 0) {
+      return 1;
+    }
+    return tokens[tokens.length - 1].line;
+  };
+
+  return (
+    <div className="Editor">
+      <div className="Editor-lines">
+        {[...Array(getLines())].map((_, i) => (
+          <div key={i}>{i + 1}</div>
+        ))}
+      </div>
+      <textarea
+        value={code}
+        onChange={handleChange}
+        spellCheck={false}
+        wrap="off"
+        className="Editor-textarea Editor-style"
+      ></textarea>
+      <pre className="Editor-display Editor-style">
+        {tokens.map((t, i) => (
+          <span key={i} className={getTokenClassName(t)}>
+            {t.lexeme}
+          </span>
+        ))}
+      </pre>
+    </div>
+  );
+}
+
+export default Editor;

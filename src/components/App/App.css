@@ -3,12 +3,11 @@
   flex-direction: column;
 }
 
-.App .editor {
+.App-container {
   display: flex;
   flex-direction: row;
 }
 
-.App .editor textarea {
+.App-output {
   width: 600px;
-  height: 400px;
 }

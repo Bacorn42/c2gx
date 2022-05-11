@@ -149,6 +149,8 @@ class Tokenizer {
     if (nextChar === "=") {
       this.getNextChar();
       this.addToken(TokenType.NOT_EQUAL);
+    } else {
+      this.addToken(TokenType.NOT);
     }
   }
 
@@ -326,6 +328,8 @@ class Tokenizer {
       this.processInteger();
     } else if (this.isLetter(char)) {
       this.processIdentifier();
+    } else {
+      this.addToken(TokenType.OTHER);
     }
   }
 

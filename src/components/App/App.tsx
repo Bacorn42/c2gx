@@ -1,13 +1,14 @@
 import React, { ChangeEvent, useState } from "react";
 import Compiler from "../../c2gx/compiler/Compiler";
+import Editor from "../Editor";
 import "./App.css";
 
 function App() {
   const [code, setCode] = useState("");
   const [translatedCode, setTranslatedCode] = useState("");
 
-  const changeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setCode(e.target.value);
+  const codeHandler = (code: string): void => {
+    setCode(code);
   };
 
   const clickHandler = () => {
@@ -22,10 +23,10 @@ function App() {
   return (
     <div className="App">
       Hello!
-      <div className="editor">
-        <textarea value={code} onChange={changeHandler} />
+      <div className="App-container">
+        <Editor code={code} codeHandler={codeHandler} />
         <button onClick={clickHandler}>Translate</button>
-        <textarea value={translatedCode} readOnly={true} />
+        <textarea value={translatedCode} readOnly={true} className="App-output" />
       </div>
     </div>
   );

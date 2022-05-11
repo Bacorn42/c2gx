@@ -1,0 +1,127 @@
+.Editor {
+  width: 600px;
+  height: 400px;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  font-family: "Courier New", Courier, monospace;
+  line-height: 20px;
+}
+
+.Editor-lines {
+  width: 60px;
+  border-right: 1px solid #333;
+  box-sizing: border-box;
+  padding: 8px;
+  color: #666;
+  text-align: right;
+  background-color: #1e1e1e;
+}
+
+.Editor-style {
+  padding: 8px;
+  margin: 0;
+  border: 0;
+  font-family: inherit;
+  font-size: inherit;
+  background: none;
+  line-height: inherit;
+  flex: 1;
+}
+
+.Editor-textarea {
+  position: absolute;
+  top: 0;
+  left: 60px;
+  width: calc(100% - 60px);
+  height: 100%;
+  -webkit-text-fill-color: rgba(0, 0, 0, 0);
+  resize: none;
+  outline: none;
+  caret-color: #d4d4d4;
+}
+
+.Editor-display {
+  background-color: #1e1e1e;
+}
+
+.Editor-GAME,
+.Editor-MAP,
+.Editor-MUSIC,
+.Editor-SCRIPT,
+.Editor-IF,
+.Editor-ELSEIF,
+.Editor-ELSE,
+.Editor-END,
+.Editor-WHILE,
+.Editor-FOR,
+.Editor-FROM,
+.Editor-TO,
+.Editor-BY,
+.Editor-GOTO {
+  color: #c586c0;
+}
+
+.Editor-STRING {
+  color: #ce9178;
+}
+
+.Editor-INTEGER {
+  color: #b5cea8;
+}
+
+.Editor-VARIABLE {
+  color: #9cdcfe;
+}
+
+.Editor-GAME_VARIABLE {
+  color: #569cd6;
+}
+
+.Editor-EQUAL,
+.Editor-EQUAL_EQUAL,
+.Editor-UAL,
+.Editor-LESS_EQUAL,
+.Editor-GREATER_EQUAL,
+.Editor-LESS,
+.Editor-GREATER,
+.Editor-AND_AND,
+.Editor-OR_OR,
+.Editor-NOT,
+.Editor-AND,
+.Editor-OR,
+.Editor-XOR,
+.Editor-MOD,
+.Editor-PLUS,
+.Editor-MINUS,
+.Editor-TIMES,
+.Editor-DIVIDE,
+.Editor-AND_EQUAL,
+.Editor-OR_EQUAL,
+.Editor-XOR_EQUAL,
+.Editor-MOD_EQUAL,
+.Editor-PLUS_EQUAL,
+.Editor-MINUS_EQUAL,
+.Editor-TIMES_EQUAL,
+.Editor-DIVIDE_EQUAL,
+.Editor-LEFT_PAREN,
+.Editor-RIGHT_PAREN,
+.Editor-COLON {
+  color: #d4d4d4;
+}
+
+.Editor-COMMENT {
+  color: #6a9955;
+}
+
+.Editor-LABEL {
+  color: #4ec9b0;
+}
+
+.Editor-OTHER {
+  color: #f44747;
+}
