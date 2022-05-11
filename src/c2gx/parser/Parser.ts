@@ -31,7 +31,7 @@ class Parser {
 
   constructor(code: string) {
     const tokenizer = new Tokenizer(code);
-    this.tokens = tokenizer.getTokens();
+    this.tokens = tokenizer.getTokensWithoutWhitespace();
     this.statements = [];
     this.current = 0;
     this.id = 0;

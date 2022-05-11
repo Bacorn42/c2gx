@@ -38,6 +38,19 @@ class Tokenizer {
     return [...this.tokens];
   }
 
+  getTokensWithoutWhitespace(): Token[] {
+    return this.getTokens().filter(
+      (t) =>
+        ![
+          TokenType.SPACE,
+          TokenType.TAB,
+          TokenType.NEW_LINE,
+          TokenType.CARRIAGE_RETURN,
+          TokenType.COMMENT,
+        ].includes(t.type)
+    );
+  }
+
   private tokenize(): void {
     while (!this.isEnd()) {
       this.start = this.current;
@@ -105,10 +118,16 @@ class Tokenizer {
         this.processComment();
         break;
       case " ":
+        this.processSpace();
+        break;
       case "\t":
+        this.processTab();
         break;
       case "\n":
-        this.line++;
+        this.processNewline();
+        break;
+      case "\r":
+        this.processCarriageReturn();
         break;
       default:
         this.processOther(nextChar);
@@ -248,7 +267,7 @@ class Tokenizer {
   }
 
   private processString(): void {
-    while (this.getChar() !== '"') {
+    while (this.getChar() !== '"' && !this.isEnd()) {
       this.getNextChar();
     }
     this.getNextChar();
@@ -270,7 +289,24 @@ class Tokenizer {
     while (this.getChar() !== "\n" && !this.isEnd()) {
       this.getNextChar();
     }
-    //Ignore comments
+    this.addToken(TokenType.COMMENT);
+  }
+
+  private processSpace(): void {
+    this.addToken(TokenType.SPACE);
+  }
+
+  private processTab(): void {
+    this.addToken(TokenType.TAB);
+  }
+
+  private processNewline(): void {
+    this.addToken(TokenType.NEW_LINE);
+    this.line++;
+  }
+
+  private processCarriageReturn(): void {
+    this.addToken(TokenType.CARRIAGE_RETURN);
   }
 
   private getNextChar(): string {

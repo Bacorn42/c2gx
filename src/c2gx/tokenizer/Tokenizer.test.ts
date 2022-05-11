@@ -35,7 +35,7 @@ describe("Tokenizer", () => {
         new Token(TokenType.EOF, "", 1),
       ];
       const tokenizer = new Tokenizer(code);
-      expect(tokenizer.getTokens()).toStrictEqual(expectedTokens);
+      expect(tokenizer.getTokensWithoutWhitespace()).toStrictEqual(expectedTokens);
     });
 
     it("Should tokenize directives and keywords", () => {
@@ -57,7 +57,7 @@ describe("Tokenizer", () => {
         new Token(TokenType.EOF, "", 1),
       ];
       const tokenizer = new Tokenizer(code);
-      expect(tokenizer.getTokens()).toStrictEqual(expectedTokens);
+      expect(tokenizer.getTokensWithoutWhitespace()).toStrictEqual(expectedTokens);
     });
 
     it("Should tokenize integers", () => {
@@ -71,7 +71,7 @@ describe("Tokenizer", () => {
         new Token(TokenType.EOF, "", 1),
       ];
       const tokenizer = new Tokenizer(code);
-      expect(tokenizer.getTokens()).toStrictEqual(expectedTokens);
+      expect(tokenizer.getTokensWithoutWhitespace()).toStrictEqual(expectedTokens);
     });
 
     it("Should tokenize strings", () => {
@@ -83,7 +83,7 @@ describe("Tokenizer", () => {
         new Token(TokenType.EOF, "", 1),
       ];
       const tokenizer = new Tokenizer(code);
-      expect(tokenizer.getTokens()).toStrictEqual(expectedTokens);
+      expect(tokenizer.getTokensWithoutWhitespace()).toStrictEqual(expectedTokens);
     });
 
     it("Should tokenize variables", () => {
@@ -95,7 +95,7 @@ describe("Tokenizer", () => {
         new Token(TokenType.EOF, "", 1),
       ];
       const tokenizer = new Tokenizer(code);
-      expect(tokenizer.getTokens()).toStrictEqual(expectedTokens);
+      expect(tokenizer.getTokensWithoutWhitespace()).toStrictEqual(expectedTokens);
     });
 
     it("Should tokenize other", () => {
@@ -112,7 +112,7 @@ describe("Tokenizer", () => {
         new Token(TokenType.EOF, "", 1),
       ];
       const tokenizer = new Tokenizer(code);
-      expect(tokenizer.getTokens()).toStrictEqual(expectedTokens);
+      expect(tokenizer.getTokensWithoutWhitespace()).toStrictEqual(expectedTokens);
     });
 
     it("Should handle newlines", () => {
@@ -127,10 +127,10 @@ describe("Tokenizer", () => {
         new Token(TokenType.EOF, "", 9),
       ];
       const tokenizer = new Tokenizer(code);
-      expect(tokenizer.getTokens()).toStrictEqual(expectedTokens);
+      expect(tokenizer.getTokensWithoutWhitespace()).toStrictEqual(expectedTokens);
     });
 
-    it("Should ignore comments", () => {
+    it("Should treat comments as whitespace", () => {
       const code = "1 ;this is a number 2 \n 3 ; this is another number";
       const expectedTokens = [
         new Token(TokenType.INTEGER, "1", 1),
@@ -138,7 +138,7 @@ describe("Tokenizer", () => {
         new Token(TokenType.EOF, "", 2),
       ];
       const tokenizer = new Tokenizer(code);
-      expect(tokenizer.getTokens()).toStrictEqual(expectedTokens);
+      expect(tokenizer.getTokensWithoutWhitespace()).toStrictEqual(expectedTokens);
     });
 
     it("Should tokenize without whitespace", () => {
@@ -155,7 +155,40 @@ describe("Tokenizer", () => {
         new Token(TokenType.EOF, "", 1),
       ];
       const tokenizer = new Tokenizer(code);
+      expect(tokenizer.getTokensWithoutWhitespace()).toStrictEqual(expectedTokens);
+    });
+
+    it("Should tokenize whitespace", () => {
+      const code = "1 2\t3\n4\r\n5 ;comment\n6";
+      const expectedTokens = [
+        new Token(TokenType.INTEGER, "1", 1),
+        new Token(TokenType.SPACE, " ", 1),
+        new Token(TokenType.INTEGER, "2", 1),
+        new Token(TokenType.TAB, "\t", 1),
+        new Token(TokenType.INTEGER, "3", 1),
+        new Token(TokenType.NEW_LINE, "\n", 1),
+        new Token(TokenType.INTEGER, "4", 2),
+        new Token(TokenType.CARRIAGE_RETURN, "\r", 2),
+        new Token(TokenType.NEW_LINE, "\n", 2),
+        new Token(TokenType.INTEGER, "5", 3),
+        new Token(TokenType.SPACE, " ", 3),
+        new Token(TokenType.COMMENT, ";comment", 3),
+        new Token(TokenType.NEW_LINE, "\n", 3),
+        new Token(TokenType.INTEGER, "6", 4),
+        new Token(TokenType.EOF, "", 4),
+      ];
+      const tokenizer = new Tokenizer(code);
       expect(tokenizer.getTokens()).toStrictEqual(expectedTokens);
+    });
+
+    it("Should tokenize unterminated string", () => {
+      const code = '"string';
+      const expectedTokens = [
+        new Token(TokenType.STRING, '"string', 1),
+        new Token(TokenType.EOF, "", 1),
+      ];
+      const tokenizer = new Tokenizer(code);
+      expect(tokenizer.getTokensWithoutWhitespace()).toStrictEqual(expectedTokens);
     });
   });
 });
