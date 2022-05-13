@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, UIEvent, useRef, useState } from "react";
 import gameVariables from "../../c2gx/compiler/gameVariables";
 import Token from "../../c2gx/tokenizer/Token";
 import Tokenizer from "../../c2gx/tokenizer/Tokenizer";
@@ -12,10 +12,28 @@ interface Props {
 
 function Editor({ code, codeHandler }: Props) {
   const [tokens, setTokens] = useState<Token[]>([]);
+  const [scrollAmount, setScrollAmount] = useState(0);
+  const textAreaElement = useRef<HTMLTextAreaElement>(null);
+  const containerElement = useRef<HTMLDivElement>(null);
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     codeHandler(e.target.value);
     setTokens(new Tokenizer(e.target.value).getTokens());
+  };
+
+  const handleScroll = (e: UIEvent<HTMLElement>) => {
+    const scroll = (e.target as HTMLElement).scrollLeft;
+    setScroll(scroll);
+  };
+
+  const setScroll = (scroll: number) => {
+    setScrollAmount(scroll);
+    if (textAreaElement.current) {
+      textAreaElement.current.scrollLeft = scroll;
+    }
+    if (containerElement.current) {
+      containerElement.current.scrollLeft = scroll;
+    }
   };
 
   const getTokenClassName = (token: Token) => {
@@ -35,26 +53,31 @@ function Editor({ code, codeHandler }: Props) {
   };
 
   return (
-    <div className="Editor">
-      <div className="Editor-lines">
-        {[...Array(getLines())].map((_, i) => (
-          <div key={i}>{i + 1}</div>
-        ))}
+    <div className="Editor" onScroll={handleScroll} ref={containerElement}>
+      <div className="Editor-container">
+        <div className="Editor-lines">
+          {[...Array(getLines())].map((_, i) => (
+            <div key={i}>{i + 1}</div>
+          ))}
+        </div>
+        <textarea
+          value={code}
+          onChange={handleChange}
+          onScroll={handleScroll}
+          spellCheck={false}
+          wrap="off"
+          className="Editor-textarea Editor-style"
+          ref={textAreaElement}
+          style={{ left: 60 + scrollAmount }}
+        ></textarea>
+        <pre className="Editor-display Editor-style" style={{ left: 60 + scrollAmount }}>
+          {tokens.map((t, i) => (
+            <span key={i} className={getTokenClassName(t)}>
+              {t.lexeme}
+            </span>
+          ))}
+        </pre>
       </div>
-      <textarea
-        value={code}
-        onChange={handleChange}
-        spellCheck={false}
-        wrap="off"
-        className="Editor-textarea Editor-style"
-      ></textarea>
-      <pre className="Editor-display Editor-style">
-        {tokens.map((t, i) => (
-          <span key={i} className={getTokenClassName(t)}>
-            {t.lexeme}
-          </span>
-        ))}
-      </pre>
     </div>
   );
 }

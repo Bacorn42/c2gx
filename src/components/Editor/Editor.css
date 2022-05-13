@@ -1,15 +1,25 @@
 .Editor {
   width: 600px;
   height: 400px;
-  position: relative;
-  display: flex;
-  flex-direction: row;
   box-sizing: border-box;
   padding: 0;
   margin: 0;
   border: 0;
-  font-family: "Courier New", Courier, monospace;
+  overflow: auto;
+  background-color: #1e1e1e;
+}
+
+.Editor-container {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0;
+  overflow: visible;
+  min-height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
   line-height: 20px;
+  font-family: "Courier New", Courier, monospace;
 }
 
 .Editor-lines {
@@ -20,9 +30,14 @@
   color: #666;
   text-align: right;
   background-color: #1e1e1e;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  left: 0;
 }
 
 .Editor-style {
+  box-sizing: border-box;
   padding: 8px;
   margin: 0;
   border: 0;
@@ -43,10 +58,11 @@
   resize: none;
   outline: none;
   caret-color: #d4d4d4;
+  overflow: hidden;
 }
 
 .Editor-display {
-  background-color: #1e1e1e;
+  max-width: calc(100% - 60px);
 }
 
 .Editor-GAME,
